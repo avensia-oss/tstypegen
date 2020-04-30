@@ -1,0 +1,29 @@
+﻿@compile
+
+[assembly: Avensia.DefineTypeScriptTypeForExternalType(typeof(System.DateTime), "external.CustomDateTime")]
+[assembly: Avensia.DefineTypeScriptTypeForExternalType("System.Guid", "external.CustomGuid")]
+
+@SomeDirectory\TestClass.cs
+
+using System;
+using Avensia;
+[assembly: DefineTypeScriptTypeForExternalType(typeof(System.TimeSpan), "external.CustomTimeSpan")]
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass1 {
+        public DateTime Prop1 { get; set; }
+        public TimeSpan Prop2 { get; set; }
+        public Guid Prop3 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass1.type.ts
+
+interface TestClass1 {
+  prop1: external.CustomDateTime;
+  prop2: external.CustomTimeSpan;
+  prop3: external.CustomGuid;
+}
+
+export default TestClass1;

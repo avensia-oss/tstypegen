@@ -1,0 +1,42 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using Newtonsoft.Json;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass1 {
+        [TypeScriptType(typeof(string))]
+        public int Prop1 { get; set; }
+
+        [TypeScriptType(typeof(TestClass2))]
+        public int Prop2 { get; set; }
+
+        [TypeScriptType("external.Type")]
+        public int Prop3 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass2 {
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass1.type.ts
+
+import TestClass2 from './TestClass2.type';
+
+interface TestClass1 {
+  prop1: string;
+  prop2: TestClass2;
+  prop3: external.Type;
+}
+
+export default TestClass1;
+
+--------------------------------------------
+@SomeDirectory\TestClass2.type.ts
+
+interface TestClass2 {
+}
+
+export default TestClass2;

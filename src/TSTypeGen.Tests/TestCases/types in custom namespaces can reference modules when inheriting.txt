@@ -1,0 +1,109 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using System.Collections.Generic;
+
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class ModuleClass1 {
+        public int Prop { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class ModuleClass2 {
+        public int Prop { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class ModuleClass3<T1, T2> {
+        public int Prop { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class ModuleClass4 {
+        public int Prop { get; set; }
+    }
+
+    [GenerateTypeScriptNamespace("test")]
+    public class TestClass1 {
+        public ModuleClass1 Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptNamespace("test")]
+    public class TestClass2 : ModuleClass2 {
+        public ModuleClass1 Prop1 { get; set; }
+        public ModuleClass2 Prop2 { get; set; }
+    }
+
+    [GenerateTypeScriptNamespace("test")]
+    public class TestClass3 : ModuleClass2 {
+    }
+
+
+    [GenerateTypeScriptNamespace("test")]
+    public class TestClass4 : ModuleClass3<ModuleClass4, ModuleClass1> {
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\ModuleClass1.type.ts
+
+interface ModuleClass1 {
+  prop: number;
+}
+
+export default ModuleClass1;
+
+--------------------------------------------
+@SomeDirectory\ModuleClass2.type.ts
+
+interface ModuleClass2 {
+  prop: number;
+}
+
+export default ModuleClass2;
+
+--------------------------------------------
+@SomeDirectory\ModuleClass3.type.ts
+
+interface ModuleClass3<T1, T2> {
+  prop: number;
+}
+
+export default ModuleClass3;
+
+--------------------------------------------
+@SomeDirectory\ModuleClass4.type.ts
+
+interface ModuleClass4 {
+  prop: number;
+}
+
+export default ModuleClass4;
+
+--------------------------------------------
+@test.d.ts
+
+declare namespace test {
+  namespace __ImportedModules {
+    type ModuleClass1 = import('./SomeDirectory/ModuleClass1.type').default;
+    type ModuleClass2 = import('./SomeDirectory/ModuleClass2.type').default;
+    type ModuleClass3 = import('./SomeDirectory/ModuleClass3.type').default;
+    type ModuleClass4 = import('./SomeDirectory/ModuleClass4.type').default;
+  }
+
+  interface TestClass1 {
+    prop1: __ImportedModules.ModuleClass1;
+  }
+
+  interface TestClass2 extends __ImportedModules.ModuleClass2 {
+    prop1: __ImportedModules.ModuleClass1;
+    prop2: __ImportedModules.ModuleClass2;
+  }
+
+  interface TestClass3 extends __ImportedModules.ModuleClass2 {
+  }
+
+  interface TestClass4 extends __ImportedModules.ModuleClass3<__ImportedModules.ModuleClass4, __ImportedModules.ModuleClass1> {
+  }
+}

@@ -1,0 +1,43 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using Newtonsoft.Json;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass1 : TestClass2 {
+        public TestClass2 Prop1 { get; set; }
+        public TestClass3 Prop2 { get; set; }
+    }
+
+    [TypeScriptType(typeof(ReplacedWith))]
+    public class TestClass2 {
+    }
+
+    [TypeScriptType("external.NewClass")]
+    public class TestClass3 {
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class ReplacedWith {
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass1.type.ts
+
+import ReplacedWith from './ReplacedWith.type';
+
+interface TestClass1 extends ReplacedWith {
+  prop1: ReplacedWith;
+  prop2: external.NewClass;
+}
+
+export default TestClass1;
+
+--------------------------------------------
+@SomeDirectory\ReplacedWith.type.ts
+
+interface ReplacedWith {
+}
+
+export default ReplacedWith;

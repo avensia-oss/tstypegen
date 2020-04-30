@@ -1,0 +1,68 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using System.Collections.Generic;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public enum TestEnum {
+        Value1,
+        Value2
+    }
+
+	[GenerateTypeScriptDefinition]
+    public struct TestNestedClass {
+        public int NestedProp1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass {
+        [TypeScriptOptional]
+        public int Prop1 { get; set; }
+        [TypeScriptOptional]
+        public string Prop2 { get; set; }
+        [TypeScriptOptional]
+        public List<string> Prop3 { get; set; }
+        [TypeScriptOptional]
+        public Dictionary<string, string> Prop4 { get; set; }
+        [TypeScriptOptional]
+        public TestEnum Prop5 { get; set; }
+        [TypeScriptOptional]
+        public TestNestedClass Prop6 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass.type.ts
+
+import TestEnum from './TestEnum.type';
+import TestNestedClass from './TestNestedClass.type';
+
+interface TestClass {
+  prop1?: number;
+  prop2?: string;
+  prop3?: string[];
+  prop4?: {[item: string]: string};
+  prop5?: TestEnum;
+  prop6?: TestNestedClass;
+}
+
+export default TestClass;
+
+--------------------------------------------
+@SomeDirectory\TestEnum.type.ts
+
+const enum TestEnum {
+  Value1 = 'value1',
+  Value2 = 'value2',
+}
+
+export default TestEnum;
+
+--------------------------------------------
+@SomeDirectory\TestNestedClass.type.ts
+
+interface TestNestedClass {
+  nestedProp1: number;
+}
+
+export default TestNestedClass;

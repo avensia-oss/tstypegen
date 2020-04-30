@@ -1,0 +1,81 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using Newtonsoft.Json;
+namespace Test {
+    [GenerateTypeScriptDerivedTypesUnion]
+    [GenerateTypeScriptDefinition]
+    public abstract class TestBase {
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass1 : TestBase {
+        public int Prop2 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    [GenerateTypeScriptDerivedTypesUnion("MyUnion")]
+    public abstract class TestClass2 : TestBase {
+        public int Prop2 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass3 : TestClass2 {
+        public int Prop3 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestBase.type.ts
+
+import TestClass1 from './TestClass1.type';
+import TestClass3 from './TestClass3.type';
+
+interface TestBase {
+  prop1: number;
+}
+
+type TestBaseTypes = TestClass1 | TestClass3;
+
+export TestBaseTypes;
+
+export default TestBase;
+
+--------------------------------------------
+@SomeDirectory\TestClass1.type.ts
+
+import TestBase from './TestBase.type';
+
+interface TestClass1 extends TestBase {
+  prop2: number;
+}
+
+export default TestClass1;
+
+--------------------------------------------
+@SomeDirectory\TestClass2.type.ts
+
+import TestBase from './TestBase.type';
+import TestClass3 from './TestClass3.type';
+
+interface TestClass2 extends TestBase {
+  prop2: number;
+}
+
+type MyUnion = TestClass3;
+
+export MyUnion;
+
+export default TestClass2;
+
+--------------------------------------------
+@SomeDirectory\TestClass3.type.ts
+
+import TestClass2 from './TestClass2.type';
+
+interface TestClass3 extends TestClass2 {
+  prop3: number;
+}
+
+export default TestClass3;

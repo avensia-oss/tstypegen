@@ -1,0 +1,24 @@
+﻿@SomeDirectory\TestConstEnum.cs
+
+using Avensia;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+	[GenerateTypeScriptConstEnum]
+    public enum TestConstEnum
+    {
+        FirstValue,
+        SecondValue,
+        ThirdValue
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestConstEnum.type.ts
+
+const enum TestConstEnum {
+  FirstValue = 'firstValue',
+  SecondValue = 'secondValue',
+  ThirdValue = 'thirdValue',
+}
+
+export default TestConstEnum;

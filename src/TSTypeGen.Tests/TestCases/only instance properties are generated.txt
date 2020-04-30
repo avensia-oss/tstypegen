@@ -1,0 +1,29 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using Newtonsoft.Json;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass {
+        public int Prop1 { get; set; }
+        public void Method1() {}
+        public int Field1;
+        public event System.EventHandler Event1;
+
+        public static int Prop2 { get; set; }
+        public static void Method2() {}
+        public static int Field2;
+        public static event System.EventHandler Event2;
+
+        public int this[int x] { get { return x; } set {} }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass.type.ts
+
+interface TestClass {
+  prop1: number;
+}
+
+export default TestClass;

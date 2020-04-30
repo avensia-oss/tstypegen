@@ -1,0 +1,66 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+namespace Test {
+    [GenerateTypeScriptNamespace("test")]
+    public class TestClass {
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptNamespace("other")]
+    public class OtherClass {
+        public int Prop3 { get; set; }
+        public string Prop4 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass2.cs
+
+using Avensia;
+namespace Test {
+    [GenerateTypeScriptNamespace("test")]
+    public class TestClass2 {
+        public int Prop3 { get; set; }
+    }
+}
+
+--------------------------------------------
+@write SomeDirectory\TestClass.cs
+
+using Avensia;
+namespace Test {
+    [GenerateTypeScriptNamespace("test")]
+    public class TestClass {
+        public int Prop1 { get; set; }
+        public string Prop2 { get; set; }
+    }
+
+    [GenerateTypeScriptNamespace("other")]
+    public class OtherClass {
+        public string Prop4 { get; set; }
+    }
+}
+
+--------------------------------------------
+@test.d.ts
+
+declare namespace test {
+  interface TestClass {
+    prop1: number;
+    prop2: string;
+  }
+
+  interface TestClass2 {
+    prop3: number;
+  }
+}
+
+--------------------------------------------
+@other.d.ts
+
+declare namespace other {
+  interface OtherClass {
+    prop4: string;
+  }
+}

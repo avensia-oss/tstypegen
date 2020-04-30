@@ -1,0 +1,15 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass {}
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass.type.ts
+
+interface TestClass {
+}
+
+export default TestClass;

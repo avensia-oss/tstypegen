@@ -1,0 +1,21 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using Newtonsoft.Json;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass {
+        public string Prop1 { get; set; }
+        [JsonIgnore]
+        public string Prop2 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass.type.ts
+
+interface TestClass {
+  prop1: string;
+}
+
+export default TestClass;

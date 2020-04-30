@@ -1,0 +1,320 @@
+﻿@config
+{
+  "rootPath": "Root",
+  "pathAliases": {
+    "alias1": "Other/Alias1",
+    "alias2": "Other/Alias2",
+  }
+}
+
+--------------------------------------------
+@Root/Directory1/Directory2/C1.cs
+
+[Avensia.GenerateTypeScriptDefinition]
+class C1 {
+    public C1 Prop1 { get; set; }
+    public C2 Prop2 { get; set; }
+    public C3 Prop3 { get; set; }
+    public C4 Prop4 { get; set; }
+    public C5 Prop5 { get; set; }
+    public C6 Prop6 { get; set; }
+    public C7 Prop7 { get; set; }
+    public C8 Prop8 { get; set; }
+}
+
+--------------------------------------------
+@Root/Directory1/C2.cs
+
+[Avensia.GenerateTypeScriptDefinition]
+class C2 {
+    public C1 Prop1 { get; set; }
+    public C2 Prop2 { get; set; }
+    public C3 Prop3 { get; set; }
+    public C4 Prop4 { get; set; }
+    public C5 Prop5 { get; set; }
+    public C6 Prop6 { get; set; }
+    public C7 Prop7 { get; set; }
+    public C8 Prop8 { get; set; }
+}
+
+--------------------------------------------
+@Root/Directory1/Directory3/C3.cs
+
+[Avensia.GenerateTypeScriptDefinition]
+class C3 {
+    public C1 Prop1 { get; set; }
+    public C2 Prop2 { get; set; }
+    public C3 Prop3 { get; set; }
+    public C4 Prop4 { get; set; }
+    public C5 Prop5 { get; set; }
+    public C6 Prop6 { get; set; }
+    public C7 Prop7 { get; set; }
+    public C8 Prop8 { get; set; }
+}
+
+--------------------------------------------
+@Root/Directory1/Directory3/Directory4/C4.cs
+
+[Avensia.GenerateTypeScriptDefinition]
+class C4 {
+    public C1 Prop1 { get; set; }
+    public C2 Prop2 { get; set; }
+    public C3 Prop3 { get; set; }
+    public C4 Prop4 { get; set; }
+    public C5 Prop5 { get; set; }
+    public C6 Prop6 { get; set; }
+    public C7 Prop7 { get; set; }
+    public C8 Prop8 { get; set; }
+}
+
+--------------------------------------------
+@Other/Alias1/C5.cs
+
+[Avensia.GenerateTypeScriptDefinition]
+class C5 {
+    public C1 Prop1 { get; set; }
+    public C2 Prop2 { get; set; }
+    public C3 Prop3 { get; set; }
+    public C4 Prop4 { get; set; }
+    public C5 Prop5 { get; set; }
+    public C6 Prop6 { get; set; }
+    public C7 Prop7 { get; set; }
+    public C8 Prop8 { get; set; }
+}
+
+--------------------------------------------
+@Other/Alias1/DirectoryA/C6.cs
+
+[Avensia.GenerateTypeScriptDefinition]
+class C6 {
+    public C1 Prop1 { get; set; }
+    public C2 Prop2 { get; set; }
+    public C3 Prop3 { get; set; }
+    public C4 Prop4 { get; set; }
+    public C5 Prop5 { get; set; }
+    public C6 Prop6 { get; set; }
+    public C7 Prop7 { get; set; }
+    public C8 Prop8 { get; set; }
+}
+
+--------------------------------------------
+@Other/Alias1/DirectoryB/C7.cs
+
+[Avensia.GenerateTypeScriptDefinition]
+class C7 {
+    public C1 Prop1 { get; set; }
+    public C2 Prop2 { get; set; }
+    public C3 Prop3 { get; set; }
+    public C4 Prop4 { get; set; }
+    public C5 Prop5 { get; set; }
+    public C6 Prop6 { get; set; }
+    public C7 Prop7 { get; set; }
+    public C8 Prop8 { get; set; }
+}
+
+--------------------------------------------
+@Other/Alias2/C8.cs
+
+[Avensia.GenerateTypeScriptDefinition]
+class C8 {
+    public C1 Prop1 { get; set; }
+    public C2 Prop2 { get; set; }
+    public C3 Prop3 { get; set; }
+    public C4 Prop4 { get; set; }
+    public C5 Prop5 { get; set; }
+    public C6 Prop6 { get; set; }
+    public C7 Prop7 { get; set; }
+    public C8 Prop8 { get; set; }
+}
+
+--------------------------------------------
+@Root/Directory1/Directory2/C1.type.ts
+
+import C2 from '../C2.type';
+import C3 from 'Directory1/Directory3/C3.type';
+import C4 from 'Directory1/Directory3/Directory4/C4.type';
+import C5 from 'alias1/C5.type';
+import C6 from 'alias1/DirectoryA/C6.type';
+import C7 from 'alias1/DirectoryB/C7.type';
+import C8 from 'alias2/C8.type';
+
+interface C1 {
+  prop1: C1;
+  prop2: C2;
+  prop3: C3;
+  prop4: C4;
+  prop5: C5;
+  prop6: C6;
+  prop7: C7;
+  prop8: C8;
+}
+
+export default C1;
+
+--------------------------------------------
+@Root/Directory1/C2.type.ts
+
+import C1 from './Directory2/C1.type';
+import C3 from './Directory3/C3.type';
+import C4 from './Directory3/Directory4/C4.type';
+import C5 from 'alias1/C5.type';
+import C6 from 'alias1/DirectoryA/C6.type';
+import C7 from 'alias1/DirectoryB/C7.type';
+import C8 from 'alias2/C8.type';
+
+interface C2 {
+  prop1: C1;
+  prop2: C2;
+  prop3: C3;
+  prop4: C4;
+  prop5: C5;
+  prop6: C6;
+  prop7: C7;
+  prop8: C8;
+}
+
+export default C2;
+
+--------------------------------------------
+@Root/Directory1/Directory3/C3.type.ts
+
+import C1 from 'Directory1/Directory2/C1.type';
+import C2 from '../C2.type';
+import C4 from './Directory4/C4.type';
+import C5 from 'alias1/C5.type';
+import C6 from 'alias1/DirectoryA/C6.type';
+import C7 from 'alias1/DirectoryB/C7.type';
+import C8 from 'alias2/C8.type';
+
+interface C3 {
+  prop1: C1;
+  prop2: C2;
+  prop3: C3;
+  prop4: C4;
+  prop5: C5;
+  prop6: C6;
+  prop7: C7;
+  prop8: C8;
+}
+
+export default C3;
+
+--------------------------------------------
+@Root/Directory1/Directory3/Directory4/C4.type.ts
+
+import C1 from 'Directory1/Directory2/C1.type';
+import C2 from '../../C2.type';
+import C3 from '../C3.type';
+import C5 from 'alias1/C5.type';
+import C6 from 'alias1/DirectoryA/C6.type';
+import C7 from 'alias1/DirectoryB/C7.type';
+import C8 from 'alias2/C8.type';
+
+interface C4 {
+  prop1: C1;
+  prop2: C2;
+  prop3: C3;
+  prop4: C4;
+  prop5: C5;
+  prop6: C6;
+  prop7: C7;
+  prop8: C8;
+}
+
+export default C4;
+
+--------------------------------------------
+@Other/Alias1/C5.type.ts
+
+import C1 from 'Directory1/Directory2/C1.type';
+import C2 from 'Directory1/C2.type';
+import C3 from 'Directory1/Directory3/C3.type';
+import C4 from 'Directory1/Directory3/Directory4/C4.type';
+import C6 from './DirectoryA/C6.type';
+import C7 from './DirectoryB/C7.type';
+import C8 from 'alias2/C8.type';
+
+interface C5 {
+  prop1: C1;
+  prop2: C2;
+  prop3: C3;
+  prop4: C4;
+  prop5: C5;
+  prop6: C6;
+  prop7: C7;
+  prop8: C8;
+}
+
+export default C5;
+
+--------------------------------------------
+@Other/Alias1/DirectoryA/C6.type.ts
+
+import C1 from 'Directory1/Directory2/C1.type';
+import C2 from 'Directory1/C2.type';
+import C3 from 'Directory1/Directory3/C3.type';
+import C4 from 'Directory1/Directory3/Directory4/C4.type';
+import C5 from '../C5.type';
+import C7 from 'alias1/DirectoryB/C7.type';
+import C8 from 'alias2/C8.type';
+
+interface C6 {
+  prop1: C1;
+  prop2: C2;
+  prop3: C3;
+  prop4: C4;
+  prop5: C5;
+  prop6: C6;
+  prop7: C7;
+  prop8: C8;
+}
+
+export default C6;
+
+--------------------------------------------
+@Other/Alias1/DirectoryB/C7.type.ts
+
+import C1 from 'Directory1/Directory2/C1.type';
+import C2 from 'Directory1/C2.type';
+import C3 from 'Directory1/Directory3/C3.type';
+import C4 from 'Directory1/Directory3/Directory4/C4.type';
+import C5 from '../C5.type';
+import C6 from 'alias1/DirectoryA/C6.type';
+import C8 from 'alias2/C8.type';
+
+interface C7 {
+  prop1: C1;
+  prop2: C2;
+  prop3: C3;
+  prop4: C4;
+  prop5: C5;
+  prop6: C6;
+  prop7: C7;
+  prop8: C8;
+}
+
+export default C7;
+
+--------------------------------------------
+@Other/Alias2/C8.type.ts
+
+import C1 from 'Directory1/Directory2/C1.type';
+import C2 from 'Directory1/C2.type';
+import C3 from 'Directory1/Directory3/C3.type';
+import C4 from 'Directory1/Directory3/Directory4/C4.type';
+import C5 from 'alias1/C5.type';
+import C6 from 'alias1/DirectoryA/C6.type';
+import C7 from 'alias1/DirectoryB/C7.type';
+
+interface C8 {
+  prop1: C1;
+  prop2: C2;
+  prop3: C3;
+  prop4: C4;
+  prop5: C5;
+  prop6: C6;
+  prop7: C7;
+  prop8: C8;
+}
+
+export default C8;

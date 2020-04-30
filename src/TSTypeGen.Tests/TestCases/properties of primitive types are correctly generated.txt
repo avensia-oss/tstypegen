@@ -1,0 +1,42 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass {
+        public byte Prop1 { get; set; }
+        public sbyte Prop2 { get; set; }
+        public short Prop3 { get; set; }
+        public ushort Prop4 { get; set; }
+        public int Prop5 { get; set; }
+        public uint Prop6 { get; set; }
+        public long Prop7 { get; set; }
+        public ulong Prop8 { get; set; }
+        public float Prop9 { get; set; }
+        public double Prop10 { get; set; }
+        public decimal Prop11 { get; set; }
+        public string Prop12 { get; set; }
+        public bool Prop13 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass.type.ts
+
+interface TestClass {
+  prop1: number;
+  prop2: number;
+  prop3: number;
+  prop4: number;
+  prop5: number;
+  prop6: number;
+  prop7: number;
+  prop8: number;
+  prop9: number;
+  prop10: number;
+  prop11: number;
+  prop12: string;
+  prop13: boolean;
+}
+
+export default TestClass;

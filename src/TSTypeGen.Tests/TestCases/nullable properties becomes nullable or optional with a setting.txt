@@ -1,0 +1,116 @@
+﻿@config
+{
+  "useOptionalForNullables": true
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass.cs
+
+using Avensia;
+using System.Collections.Generic;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public struct TestStruct {
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestGeneric<T1, T2> {
+        public T1 Prop1 { get; set; }
+        public T2 Prop2 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestImpl : TestGeneric<int?, bool?> {
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass {
+        public byte? Prop1 { get; set; }
+        public sbyte? Prop2 { get; set; }
+        public short? Prop3 { get; set; }
+        public ushort? Prop4 { get; set; }
+        public int? Prop5 { get; set; }
+        public uint? Prop6 { get; set; }
+        public long? Prop7 { get; set; }
+        public ulong? Prop8 { get; set; }
+        public float? Prop9 { get; set; }
+        public double? Prop10 { get; set; }
+        public decimal? Prop11 { get; set; }
+        public bool? Prop12 { get; set; }
+        public TestStruct? Prop13 { get; set; }
+
+        public IEnumerable<TestStruct?> Prop14 { get; set; }
+        public Dictionary<int, TestStruct?> Prop15 { get; set; }
+
+        [TypeScriptOptional]
+        public string Prop16 { get; set; }
+        [TypeScriptOptional]
+        public int Prop17 { get; set; }
+        [TypeScriptOptional]
+        public int? Prop18 { get; set; }
+
+        public string Prop19 { get; set; }
+        public int Prop20 { get; set; }
+        public TestImpl Prop21 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass.type.ts
+
+import TestImpl from './TestImpl.type';
+import TestStruct from './TestStruct.type';
+
+interface TestClass {
+  prop1?: number;
+  prop2?: number;
+  prop3?: number;
+  prop4?: number;
+  prop5?: number;
+  prop6?: number;
+  prop7?: number;
+  prop8?: number;
+  prop9?: number;
+  prop10?: number;
+  prop11?: number;
+  prop12?: boolean;
+  prop13?: TestStruct;
+  prop14: (TestStruct | undefined)[];
+  prop15: {[item: number]: TestStruct | undefined};
+  prop16?: string;
+  prop17?: number;
+  prop18?: number;
+  prop19: string;
+  prop20: number;
+  prop21: TestImpl;
+}
+
+export default TestClass;
+
+--------------------------------------------
+@SomeDirectory\TestStruct.type.ts
+
+interface TestStruct {
+}
+
+export default TestStruct;
+
+--------------------------------------------
+@SomeDirectory\TestGeneric.type.ts
+
+interface TestGeneric<T1, T2> {
+  prop1: T1;
+  prop2: T2;
+}
+
+export default TestGeneric;
+
+--------------------------------------------
+@SomeDirectory\TestImpl.type.ts
+
+import TestGeneric from './TestGeneric.type';
+
+interface TestImpl extends TestGeneric<number | undefined, boolean | undefined> {
+}
+
+export default TestImpl;

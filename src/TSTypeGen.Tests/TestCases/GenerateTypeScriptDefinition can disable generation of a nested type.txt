@@ -1,0 +1,94 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using Newtonsoft.Json;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass1 {
+        public int Prop1 { get; set; }
+
+        [GenerateTypeScriptDefinition(false)]
+        public class InnerClass11 {
+            public int Prop2 { get; set; }
+        }
+
+        [GenerateTypeScriptDefinition(false)]
+        public class InnerClass12 {
+            public int Prop2 { get; set; }
+
+            public class InnerClass13 {
+                public int Prop2 { get; set; }
+            }
+        }
+
+        [GenerateTypeScriptDefinition(false)]
+        public class InnerClass14 {
+            public int Prop2 { get; set; }
+
+            [GenerateTypeScriptDefinition]
+            public class InnerClass15 {
+                public int Prop2 { get; set; }
+            }
+        }
+    }
+
+    [GenerateTypeScriptNamespace("test")]
+    public class TestClass2 {
+        public int Prop1 { get; set; }
+
+        [GenerateTypeScriptDefinition(false)]
+        public class InnerClass21 {
+            public int Prop2 { get; set; }
+        }
+
+        [GenerateTypeScriptDefinition(false)]
+        public class InnerClass22 {
+            public int Prop2 { get; set; }
+
+            public class InnerClass23 {
+                public int Prop2 { get; set; }
+            }
+        }
+
+        [GenerateTypeScriptDefinition(false)]
+        public class InnerClass24 {
+            public int Prop2 { get; set; }
+
+            [GenerateTypeScriptDefinition]
+            public class InnerClass25 {
+                public int Prop2 { get; set; }
+            }
+        }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass1.type.ts
+
+interface TestClass1 {
+  prop1: number;
+}
+
+export default TestClass1;
+
+--------------------------------------------
+@SomeDirectory\TestClass1+InnerClass14+InnerClass15.type.ts
+
+interface InnerClass15 {
+  prop2: number;
+}
+
+export default InnerClass15;
+
+--------------------------------------------
+@test.d.ts
+
+declare namespace test {
+  interface InnerClass25 {
+    prop2: number;
+  }
+
+  interface TestClass2 {
+    prop1: number;
+  }
+}

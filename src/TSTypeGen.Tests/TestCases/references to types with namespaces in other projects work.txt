@@ -1,0 +1,31 @@
+﻿@compile
+
+using Avensia;
+[assembly: GenerateTypeScriptNamespace("otherns")]
+namespace External {
+    [GenerateTypeScriptDefinition]
+    public class TestExternalClass {
+    }
+}
+
+@SomeDirectory\TestClass.cs
+
+using Avensia;
+using System.Collections.Generic;
+using External;
+[assembly: GenerateTypeScriptNamespace("test")]
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass {
+        public TestExternalClass Prop1 { get; set; }
+    }
+}
+
+--------------------------------------------
+@test.d.ts
+
+declare namespace test {
+  interface TestClass {
+    prop1: otherns.TestExternalClass;
+  }
+}

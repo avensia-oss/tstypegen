@@ -1,0 +1,32 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using Newtonsoft.Json;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass {
+        [JsonProperty]
+        public string Prop1 { get; set; }
+        [JsonProperty("RenamedProp2")]
+        public string Prop2 { get; set; }
+        [JsonProperty(PropertyName = "RenamedProp3")]
+        public string Prop3 { get; set; }
+        [JsonProperty("SpuriousIgnoredName", PropertyName = "RenamedProp4")]
+        public string Prop4 { get; set; }
+        [JsonProperty("0IsNotAValidJsIdentifier")]
+        public string Prop5 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass.type.ts
+
+interface TestClass {
+  prop1: string;
+  RenamedProp2: string;
+  RenamedProp3: string;
+  RenamedProp4: string;
+  '0IsNotAValidJsIdentifier': string;
+}
+
+export default TestClass;

@@ -1,0 +1,20 @@
+{
+  "name": "@avensia-oss/tstypegen",
+  "version": "1.0.0",
+  "description": "A tool to generate TypeScript types from C# types",
+  "main": "index.js",
+  "repository": "https://github.com/avensia-oss/tstypegen",
+  "author": "Anders Ekdahl <anders.ekdahl@avensia.com>",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "bin/*.exe",
+    "bin/*.dll",
+    "bin/*.pdb",
+    "bin/*.config"
+  ],
+  "bin": "./bin/TSTypeGen.exe"
+}

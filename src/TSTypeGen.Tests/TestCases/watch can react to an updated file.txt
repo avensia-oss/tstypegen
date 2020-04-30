@@ -1,0 +1,31 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass {
+        public int Prop1 { get; set; }
+    }
+}
+
+--------------------------------------------
+@write SomeDirectory\TestClass.cs
+
+using Avensia;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass {
+        public int Prop1 { get; set; }
+        public string Prop2 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass.type.ts
+
+interface TestClass {
+  prop1: number;
+  prop2: string;
+}
+
+export default TestClass;
