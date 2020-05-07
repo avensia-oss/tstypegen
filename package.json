@@ -14,7 +14,8 @@
     "bin/*.exe",
     "bin/*.dll",
     "bin/*.pdb",
-    "bin/*.config"
+    "bin/*.config",
+    "bin/*.runtimeconfig.json"
   ],
   "bin": "./bin/TSTypeGen.exe"
 }
