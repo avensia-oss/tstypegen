@@ -8,6 +8,8 @@ namespace Test {
         public string Prop1 { get; set; }
         [JsonIgnore]
         public string Prop2 { get; set; }
+        [TypeScriptIgnore]
+        public string Prop3 { get; set; }
     }
 }
 

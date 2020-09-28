@@ -56,7 +56,10 @@ namespace TSTypeGen
 
         private static TsInterfaceMember BuildMember(IPropertySymbol property, TypeBuilderConfig config, string currentTsNamespace)
         {
-            if (property.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == "Newtonsoft.Json.JsonIgnoreAttribute"))
+            if (property.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "Newtonsoft.Json.JsonIgnoreAttribute"))
+                return null;
+
+            if (property.GetAttributes().Any(a => a.AttributeClass?.Name == Program.TypeScriptIgnoreAttributeName))
                 return null;
 
             string name = FindNameFromJsonPropertyAttribute(property);
@@ -66,7 +69,7 @@ namespace TSTypeGen
                 name = StringUtils.ToCamelCase(property.Name);
             }
 
-            var isOptional = property.GetAttributes().FirstOrDefault(a => a.AttributeClass.Name == Program.TypeScriptOptionalAttributeName) != null;
+            var isOptional = property.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == Program.TypeScriptOptionalAttributeName) != null;
 
             return new TsInterfaceMember(name, BuildTsTypeReferenceToPropertyType(property, config, currentTsNamespace), isOptional);
         }
@@ -74,7 +77,7 @@ namespace TSTypeGen
         private static TsTypeReference BuildTsTypeReferenceToPropertyType(IPropertySymbol property, TypeBuilderConfig config, string currentTsNamespace)
         {
             ITypeSymbol type = property.Type;
-            var typeScriptTypeAttribute = property.GetAttributes().FirstOrDefault(a => a.AttributeClass.Name == Program.TypeScriptTypeAttributeName && a.ConstructorArguments.Length == 1);
+            var typeScriptTypeAttribute = property.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == Program.TypeScriptTypeAttributeName && a.ConstructorArguments.Length == 1);
             if (typeScriptTypeAttribute != null)
             {
                 if (typeScriptTypeAttribute.ConstructorArguments[0].Value is string typeString)

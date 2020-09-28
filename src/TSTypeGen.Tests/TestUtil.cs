@@ -21,6 +21,7 @@ namespace TSTypeGen.Tests
                     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)] public sealed class DefineTypeScriptTypeForExternalTypeAttribute : Attribute { public DefineTypeScriptTypeForExternalTypeAttribute(Type type, string name) {} public DefineTypeScriptTypeForExternalTypeAttribute(string qualifiedTypeName, string name) {} }
                     public sealed class TypeScriptTypeAttribute : Attribute { public TypeScriptTypeAttribute(Type type) {} public TypeScriptTypeAttribute(string type) {} }
                     public sealed class TypeScriptOptionalAttribute : Attribute {}
+                    public sealed class TypeScriptIgnoreAttribute : Attribute {}
                     public sealed class GenerateTypeScriptDerivedTypesUnionAttribute : Attribute { public GenerateTypeScriptDerivedTypesUnionAttribute(string name = null) {} }
                     public sealed class GenerateTypeScriptTypeMemberAttribute : Attribute { public GenerateTypeScriptTypeMemberAttribute(string name = null) {} }
                     public sealed class GenerateTypeScriptConstEnumAttribute : Attribute {}
