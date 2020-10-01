@@ -1,4 +1,9 @@
-﻿@SomeDirectory\TestClass.cs
+﻿@config
+{
+  "customTypeScriptIgnoreAttributeFullName": "Avensia.CustomTypeScriptIgnoreAttribute"
+}
+
+@SomeDirectory\TestClass.cs
 
 using Avensia;
 using Newtonsoft.Json;
@@ -9,7 +14,9 @@ namespace Test {
         public string InterfaceProp1 { get; set; }
         [TypeScriptIgnore]
         public string InterfaceProp2 { get; set; }
+        [CustomTypeScriptIgnore]
         public string InterfaceProp3 { get; set; }
+        public string InterfaceProp4 { get; set; }
     }
 
     [GenerateTypeScriptDefinition]
@@ -17,6 +24,7 @@ namespace Test {
         public string InterfaceProp1 { get; set; }
         public string InterfaceProp2 { get; set; }
         public string InterfaceProp3 { get; set; }
+        public string InterfaceProp4 { get; set; }
         public string Prop1 { get; set; }
         [JsonIgnore]
         public string Prop2 { get; set; }
@@ -29,7 +37,7 @@ namespace Test {
 @SomeDirectory\TestClass.type.ts
 
 interface TestClass {
-  interfaceProp3: string;
+  interfaceProp4: string;
   prop1: string;
 }
 
@@ -38,7 +46,7 @@ export default TestClass;
 @SomeDirectory\TestInterface.type.ts
 
 interface TestInterface {
-  interfaceProp3: string;
+  interfaceProp4: string;
 }
 
 export default TestInterface;

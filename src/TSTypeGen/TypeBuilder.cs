@@ -67,6 +67,9 @@ namespace TSTypeGen
                 if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "Newtonsoft.Json.JsonIgnoreAttribute"))
                     return null;
 
+                if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == config.CustomTypeScriptIgnoreAttributeFullName))
+                    return null;
+
                 if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.Name == Program.TypeScriptIgnoreAttributeName))
                     return null;
             }

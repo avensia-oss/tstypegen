@@ -264,7 +264,8 @@ namespace TSTypeGen
                     ImmutableDictionary.CreateRange(typeMappings),
                     propertyTypeReference,
                     _config.TypesToWrapPropertiesFor,
-                    _config.StructuralSubsetOfInterfaceFullName
+                    _config.StructuralSubsetOfInterfaceFullName,
+                    _config.CustomTypeScriptIgnoreAttributeFullName
                 );
                 _typeBuilderConfigs = _typeBuilderConfigs.Add(project.Id, typeBuildConfig);
             }
