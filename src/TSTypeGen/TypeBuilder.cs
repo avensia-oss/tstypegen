@@ -54,13 +54,22 @@ namespace TSTypeGen
             return null;
         }
 
-        private static TsInterfaceMember BuildMember(IPropertySymbol property, TypeBuilderConfig config, string currentTsNamespace)
+        private static TsInterfaceMember BuildMember(IPropertySymbol property, ImmutableArray<INamedTypeSymbol> interfaces, TypeBuilderConfig config, string currentTsNamespace)
         {
-            if (property.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "Newtonsoft.Json.JsonIgnoreAttribute"))
-                return null;
+            var interfaceProperties = interfaces.SelectMany(i => i.GetMembers(property.Name).OfType<IPropertySymbol>());
 
-            if (property.GetAttributes().Any(a => a.AttributeClass?.Name == Program.TypeScriptIgnoreAttributeName))
-                return null;
+            var allPropertiesToCheckForIgnore = new List<IPropertySymbol>();
+            allPropertiesToCheckForIgnore.AddRange(interfaceProperties);
+            allPropertiesToCheckForIgnore.Add(property);
+
+            foreach (var propertyToCheckForIgnore in allPropertiesToCheckForIgnore)
+            {
+                if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "Newtonsoft.Json.JsonIgnoreAttribute"))
+                    return null;
+
+                if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.Name == Program.TypeScriptIgnoreAttributeName))
+                    return null;
+            }
 
             string name = FindNameFromJsonPropertyAttribute(property);
 
@@ -346,7 +355,7 @@ namespace TSTypeGen
 
                 bool wrapMembers = type.AllInterfaces.Any(i => { var s = i.ToDisplayString(); return config.TypesToWrapPropertiesFor.Contains(s); });
                 return TsTypeDefinition.Interface(type.Name,
-                                                  properties.Select(p => BuildMember(p, config, tsNamespace)).Where(x => x != null).Select(p => wrapMembers ? WrapProperty(p, config) : p),
+                                                  properties.Select(p => BuildMember(p, type.Interfaces, config, tsNamespace)).Where(x => x != null).Select(p => wrapMembers ? WrapProperty(p, config) : p),
                                                   extends.Select(e => BuildTsTypeReference(e, config, tsNamespace, true)),
                                                   type.TypeParameters.Select(tp => tp.Name),
                                                   GetMustBeAssignableFromList(type, config, tsNamespace),

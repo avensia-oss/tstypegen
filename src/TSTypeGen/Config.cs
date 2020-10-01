@@ -18,7 +18,6 @@ namespace TSTypeGen
         public bool UseConstEnums { get; set; } = true;
         public bool UseOptionalForNullables { get; set; } = true;
 
-
         public static Config ReadFromFile(string path)
         {
             var result = JsonConvert.DeserializeObject<Config>(File.ReadAllText(path), new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });

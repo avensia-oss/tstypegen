@@ -4,7 +4,19 @@ using Avensia;
 using Newtonsoft.Json;
 namespace Test {
     [GenerateTypeScriptDefinition]
-    public class TestClass {
+    public interface TestInterface {
+        [JsonIgnore]
+        public string InterfaceProp1 { get; set; }
+        [TypeScriptIgnore]
+        public string InterfaceProp2 { get; set; }
+        public string InterfaceProp3 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass : TestInterface {
+        public string InterfaceProp1 { get; set; }
+        public string InterfaceProp2 { get; set; }
+        public string InterfaceProp3 { get; set; }
         public string Prop1 { get; set; }
         [JsonIgnore]
         public string Prop2 { get; set; }
@@ -17,7 +29,16 @@ namespace Test {
 @SomeDirectory\TestClass.type.ts
 
 interface TestClass {
+  interfaceProp3: string;
   prop1: string;
 }
 
 export default TestClass;
+
+@SomeDirectory\TestInterface.type.ts
+
+interface TestInterface {
+  interfaceProp3: string;
+}
+
+export default TestInterface;
