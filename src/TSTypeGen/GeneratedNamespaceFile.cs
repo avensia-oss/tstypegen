@@ -27,7 +27,7 @@ namespace TSTypeGen
             var importMappings = new Dictionary<ImportedType, string>();
 
             var innerSource = new StringBuilder();
-            foreach (var t in _types.OrderBy(t => t.Name).ThenBy(t => t.ToDisplayString()))
+            foreach (var t in _types.OrderBy(t => t.Name, StringComparer.InvariantCulture).ThenBy(t => t.ToDisplayString(), StringComparer.InvariantCulture))
             {
                 if (!first)
                 {
@@ -46,7 +46,7 @@ namespace TSTypeGen
 
             if (importSource.Length > 0)
             {
-                return "declare namespace " + _namespaceName + " {" + Environment.NewLine + 
+                return "declare namespace " + _namespaceName + " {" + Environment.NewLine +
                        "  namespace __ImportedModules {" + Environment.NewLine +
                        importSource +
                        "  }" + Environment.NewLine + Environment.NewLine +

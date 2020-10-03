@@ -288,7 +288,7 @@ namespace TSTypeGen
 
             var derivedTypes = derivedClasses
                 .Where(t => !t.IsAbstract)
-                .OrderBy(t => t.Name);
+                .OrderBy(t => t.Name, StringComparer.InvariantCulture);
 
             return new DerivedTypesUnionGeneration(ImmutableArray.CreateRange(derivedTypes.Select(i => BuildTsTypeReference(i, config, currentTsNamespace, true))), derivedTypesUnionName);
         }

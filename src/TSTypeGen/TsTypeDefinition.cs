@@ -67,7 +67,10 @@ namespace TSTypeGen
                     rawImports = rawImports.Concat(_derivedTypesUnionGeneration.DerivedTypeReferences.SelectMany(t => t.GetImportStatements()));
                 }
 
-                foreach (var rawImport in rawImports.GroupBy(x => x.SourceFile).Select(g => g.First()).OrderBy(x => x.NamedImportName).ThenBy(x => x.DefaultVariableName, StringComparer.OrdinalIgnoreCase).ThenBy(x => x.SourceFile, StringComparer.OrdinalIgnoreCase))
+                foreach (var rawImport in rawImports.GroupBy(x => x.SourceFile).Select(g => g.First())
+                    .OrderBy(x => x.NamedImportName, StringComparer.InvariantCulture)
+                    .ThenBy(x => x.DefaultVariableName, StringComparer.InvariantCultureIgnoreCase)
+                    .ThenBy(x => x.SourceFile, StringComparer.InvariantCultureIgnoreCase))
                 {
                     var key = new ImportedType(rawImport.SourceFile, rawImport.NamedImportName);
                     if (importMappings.ContainsKey(key))
