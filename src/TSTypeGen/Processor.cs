@@ -111,13 +111,25 @@ namespace TSTypeGen
                 if (_projectOrSolutionPath.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
                 {
                     _solution = await ws.OpenSolutionAsync(_projectOrSolutionPath);
+
+                    foreach (var project in _solution.Projects)
+                    {
+                        if (await ShouldIgnoreProjectAsync(project))
+                        {
+                            _solution = _solution.RemoveProject(project.Id);
+                        }
+                    }
+
                     _projectIds = new HashSet<ProjectId>(_solution.Projects.Select(p => p.Id));
                 }
                 else
                 {
                     var project = await ws.OpenProjectAsync(_projectOrSolutionPath);
                     _solution = ws.CurrentSolution;
-                    _projectIds = new HashSet<ProjectId> { project.Id };
+                    _projectIds = new HashSet<ProjectId>();
+
+                    if (!await ShouldIgnoreProjectAsync(project))
+                        _projectIds.Add(project.Id);
                 }
 
                 bool result = true;
@@ -530,6 +542,12 @@ namespace TSTypeGen
             }
 
             return DoGetTypescriptNamespace(type.ContainingAssembly);
+        }
+
+        private static async Task<bool> ShouldIgnoreProjectAsync(Project project)
+        {
+            var compilation = await project.GetCompilationAsync();
+            return compilation.Assembly.GetAttributes().Any(x => x.AttributeClass.Name == Program.TypeScriptIgnoreAttributeName);
         }
     }
 }
