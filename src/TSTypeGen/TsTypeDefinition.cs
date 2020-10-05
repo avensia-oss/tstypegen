@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
 
 namespace TSTypeGen
 {
@@ -19,9 +20,9 @@ namespace TSTypeGen
             Name = name;
         }
 
-        public static TsTypeDefinition Interface(string name, IEnumerable<TsInterfaceMember> members, IEnumerable<TsTypeReference> extends, IEnumerable<string> typeParameters, IEnumerable<TsTypeReference> mustBeAssignableFrom, DerivedTypesUnionGeneration derivedTypesUnionGeneration, string typeMemberName)
+        public static TsTypeDefinition Interface(INamedTypeSymbol type, IEnumerable<TsInterfaceMember> members, IEnumerable<TsTypeReference> extends, IEnumerable<string> typeParameters, IEnumerable<TsTypeReference> mustBeAssignableFrom, DerivedTypesUnionGeneration derivedTypesUnionGeneration, string typeMemberName)
         {
-            return new InterfaceType(name, members, extends, typeParameters, mustBeAssignableFrom, derivedTypesUnionGeneration, typeMemberName);
+            return new InterfaceType(type, members, extends, typeParameters, mustBeAssignableFrom, derivedTypesUnionGeneration, typeMemberName);
         }
 
         public static TsTypeDefinition Enum(string name, IEnumerable<string> members, bool useConstEnum)
@@ -35,23 +36,25 @@ namespace TSTypeGen
             private readonly ImmutableArray<string> _typeParameters;
             private readonly ImmutableArray<TsTypeReference> _extends;
             private readonly ImmutableArray<TsTypeReference> _mustBeAssignableFrom;
+            private readonly INamedTypeSymbol _type;
             private readonly DerivedTypesUnionGeneration _derivedTypesUnionGeneration;
             private readonly string _typeMemberName;
 
             public InterfaceType(
-                string name,
+                INamedTypeSymbol type,
                 IEnumerable<TsInterfaceMember> members,
                 IEnumerable<TsTypeReference> extends,
                 IEnumerable<string> typeParameters,
                 IEnumerable<TsTypeReference> mustBeAssignableFrom,
                 DerivedTypesUnionGeneration derivedTypesUnionGeneration,
                 string typeMemberName
-            ) : base(name)
+            ) : base(type.Name)
             {
                 _members = ImmutableArray.CreateRange(members);
                 _extends = ImmutableArray.CreateRange(extends);
                 _typeParameters = ImmutableArray.CreateRange(typeParameters);
                 _mustBeAssignableFrom = ImmutableArray.CreateRange(mustBeAssignableFrom);
+                _type = type;
                 _derivedTypesUnionGeneration = derivedTypesUnionGeneration;
                 _typeMemberName = typeMemberName;
             }
@@ -106,6 +109,11 @@ namespace TSTypeGen
                 var result = new StringBuilder();
 
                 EnsureImports(importMappings);
+
+                if (Processor.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
+                {
+                    result.AppendLine($"{indent}/** @DotNetTypeName {GetFullNamespaceName(_type)}.{_type.Name},{_type.ContainingAssembly.Name} */");
+                }
 
                 result.Append($"{indent}interface {Name}");
                 if (_typeParameters.Length > 0)
@@ -179,6 +187,20 @@ namespace TSTypeGen
             {
                 return ValidIdentifierRegex.IsMatch(name) ? name : $"'{name}'";
             }
+        }
+
+        private string GetFullNamespaceName(INamespaceOrTypeSymbol type)
+        {
+            var namespaces = new List<string>();
+            while (!string.IsNullOrEmpty(type.ContainingNamespace?.Name))
+            {
+                namespaces.Add(type.ContainingNamespace.Name);
+                type = type.ContainingNamespace;
+            }
+
+            namespaces.Reverse();
+
+            return string.Join(".", namespaces);
         }
 
         private class EnumType : TsTypeDefinition

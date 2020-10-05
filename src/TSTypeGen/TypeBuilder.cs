@@ -357,7 +357,7 @@ namespace TSTypeGen
                 }
 
                 bool wrapMembers = type.AllInterfaces.Any(i => { var s = i.ToDisplayString(); return config.TypesToWrapPropertiesFor.Contains(s); });
-                return TsTypeDefinition.Interface(type.Name,
+                return TsTypeDefinition.Interface(type,
                                                   properties.Select(p => BuildMember(p, type.Interfaces, config, tsNamespace)).Where(x => x != null).Select(p => wrapMembers ? WrapProperty(p, config) : p),
                                                   extends.Select(e => BuildTsTypeReference(e, config, tsNamespace, true)),
                                                   type.TypeParameters.Select(tp => tp.Name),

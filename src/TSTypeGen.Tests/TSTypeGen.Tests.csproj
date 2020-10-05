@@ -45,6 +45,7 @@
     <EmbeddedResource Include="TestCases\generating types into different namespaces works for namespace assemblies.txt" />
     <EmbeddedResource Include="TestCases\generating types into different namespaces works.txt" />
     <EmbeddedResource Include="TestCases\generics work.txt" />
+    <EmbeddedResource Include="TestCases\generates dot net type name as jsdoc comment if requested.txt" />
     <EmbeddedResource Include="TestCases\imports with name collision work.txt" />
     <EmbeddedResource Include="TestCases\imports work.txt" />
     <EmbeddedResource Include="TestCases\interface implementation is not typescript inheritance.txt" />

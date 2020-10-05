@@ -544,6 +544,26 @@ namespace TSTypeGen
             return DoGetTypescriptNamespace(type.ContainingAssembly);
         }
 
+        internal static bool ShouldGenerateDotNetTypeNamesAsJsDocComment(ITypeSymbol type)
+        {
+            bool DoShouldGenerateDotNetTypeNamesAsJsDocComment(ISymbol symbol)
+            {
+                var attr = symbol.GetAttributes().FirstOrDefault(a => a.AttributeClass.Name == Program.GenerateDotNetTypeNamesAsJsDocCommentAttributeName);
+                return attr != null;
+            }
+
+            for (var currentType = type; currentType != null; currentType = currentType.ContainingType)
+            {
+                var shouldGenerate = DoShouldGenerateDotNetTypeNamesAsJsDocComment(currentType);
+                if (shouldGenerate)
+                {
+                    return true;
+                }
+            }
+
+            return DoShouldGenerateDotNetTypeNamesAsJsDocComment(type.ContainingAssembly);
+        }
+
         private static async Task<bool> ShouldIgnoreProjectAsync(Project project)
         {
             var compilation = await project.GetCompilationAsync();
