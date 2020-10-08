@@ -160,6 +160,10 @@ namespace TSTypeGen
                         }
                     }
                 }
+                else
+                {
+                    return result;
+                }
 
                 if (result != null)
                 {
