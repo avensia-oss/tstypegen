@@ -293,7 +293,7 @@ namespace TSTypeGen
                 pathAliases[alias.Key] = EnsureTrailingBackslash(Path.GetFullPath(Path.Combine(_config.BasePath, alias.Value)));
             }
 
-            _getSourceConfig = new GetSourceConfig(rootPath, ImmutableDictionary.CreateRange(pathAliases), _config.UseConstEnums, _config.UseOptionalForNullables);
+            _getSourceConfig = new GetSourceConfig(rootPath, _config.NewLine, ImmutableDictionary.CreateRange(pathAliases), _config.UseConstEnums, _config.UseOptionalForNullables);
         }
 
         private static string EnsureTrailingBackslash(string s)

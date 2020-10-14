@@ -46,15 +46,15 @@ namespace TSTypeGen
 
             if (importSource.Length > 0)
             {
-                return "declare namespace " + _namespaceName + " {" + Environment.NewLine +
-                       "  namespace __ImportedModules {" + Environment.NewLine +
+                return "declare namespace " + _namespaceName + " {" + getSourceConfig.NewLine +
+                       "  namespace __ImportedModules {" + getSourceConfig.NewLine +
                        importSource +
-                       "  }" + Environment.NewLine + Environment.NewLine +
-                       innerSource.ToString() + "}" + Environment.NewLine;
+                       "  }" + getSourceConfig.NewLine + getSourceConfig.NewLine +
+                       innerSource.ToString() + "}" + getSourceConfig.NewLine;
             }
             else
             {
-                return "declare namespace " + _namespaceName + " {" + Environment.NewLine + innerSource.ToString() + "}" + Environment.NewLine;
+                return "declare namespace " + _namespaceName + " {" + getSourceConfig.NewLine + innerSource.ToString() + "}" + getSourceConfig.NewLine;
             }
         }
     }

@@ -49,7 +49,7 @@ namespace TSTypeGen
                 }
             }
 
-            return hasImport ? imports.ToString() + Environment.NewLine + source : source;
+            return hasImport ? imports.ToString() + getSourceConfig.NewLine + source : source;
         }
     }
 }
