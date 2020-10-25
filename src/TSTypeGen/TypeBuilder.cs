@@ -360,7 +360,7 @@ namespace TSTypeGen
                 }
                 else
                 {
-                    extends = new[] { type.BaseType };
+                    extends = new List<ITypeSymbol>() { type.BaseType };
                 }
 
                 foreach (var iface in type.Interfaces)
