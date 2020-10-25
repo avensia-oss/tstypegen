@@ -1,6 +1,6 @@
 {
   "name": "@avensia-oss/tstypegen",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "A tool to generate TypeScript types from C# types",
   "main": "index.js",
   "repository": "https://github.com/avensia-oss/tstypegen",
