@@ -71,6 +71,7 @@
     <EmbeddedResource Include="TestCases\types in generated modules can reference namespaced types.txt" />
     <EmbeddedResource Include="TestCases\TypeScriptTypeAttribute can be used on a type.txt" />
     <EmbeddedResource Include="TestCases\TypeScriptTypeAttribute can be used to change the generated type of a property.txt" />
+    <EmbeddedResource Include="TestCases\TypeScriptTypeAttribute wins over JsonIgnoreAttribute.txt" />
     <EmbeddedResource Include="TestCases\watch can delete a generated namespace file.txt" />
     <EmbeddedResource Include="TestCases\watch can react to a deleted file when generating a namespace.txt" />
     <EmbeddedResource Include="TestCases\watch can react to a deleted file when overriding namespaces.txt" />

@@ -64,14 +64,17 @@ namespace TSTypeGen
 
             foreach (var propertyToCheckForIgnore in allPropertiesToCheckForIgnore)
             {
-                if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "Newtonsoft.Json.JsonIgnoreAttribute"))
-                    return null;
+                if (!propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.Name == Program.TypeScriptTypeAttributeName))
+                {
+                    if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "Newtonsoft.Json.JsonIgnoreAttribute"))
+                        return null;
 
-                if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == config.CustomTypeScriptIgnoreAttributeFullName))
-                    return null;
+                    if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == config.CustomTypeScriptIgnoreAttributeFullName))
+                        return null;
 
-                if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.Name == Program.TypeScriptIgnoreAttributeName))
-                    return null;
+                    if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.Name == Program.TypeScriptIgnoreAttributeName))
+                        return null;
+                }
             }
 
             string name = FindNameFromJsonPropertyAttribute(property);
