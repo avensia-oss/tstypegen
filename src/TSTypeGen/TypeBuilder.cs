@@ -349,18 +349,31 @@ namespace TSTypeGen
                                  .OfType<IPropertySymbol>()
                                  .Where(p => p.DeclaredAccessibility == Accessibility.Public && !p.IsOverride && p.Parameters.Length == 0 && !p.IsStatic);
 
-                IEnumerable<ITypeSymbol> extends;
+                IList<ITypeSymbol> extends;
                 if (type.TypeKind == TypeKind.Interface)
                 {
-                    extends = type.Interfaces;
+                    extends = type.Interfaces.Cast<ITypeSymbol>().ToList();
                 }
                 else if (type.TypeKind == TypeKind.Struct || type.BaseType.SpecialType == SpecialType.System_Object)
                 {
-                    extends = new INamedTypeSymbol[0];
+                    extends = new List<ITypeSymbol>();
                 }
                 else
                 {
                     extends = new[] { type.BaseType };
+                }
+
+                foreach (var iface in type.Interfaces)
+                {
+                    // We look for default interface properties because we don't generate an extends clause for C# interfaces
+                    // but that means we loose default interface properties. If any of the types interface has default properties
+                    // we include it in the extends clause.
+                    var defaultInterfaceProperties = iface.GetMembers()
+                        .OfType<IPropertySymbol>()
+                        .Where(p => p.DeclaredAccessibility == Accessibility.Public && !p.IsOverride && p.Parameters.Length == 0 && !p.IsStatic && !p.IsAbstract);
+
+                    if (defaultInterfaceProperties.Any() && !extends.Contains(iface))
+                        extends.Add(iface);
                 }
 
                 bool wrapMembers = type.AllInterfaces.Any(i => { var s = i.ToDisplayString(); return config.TypesToWrapPropertiesFor.Contains(s); });

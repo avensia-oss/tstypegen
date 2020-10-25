@@ -1,0 +1,35 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using Newtonsoft.Json;
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public interface ITest {
+        public int Prop1 => 1;
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass : ITest {
+        public int Prop2 { get; set; }
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\ITest.type.ts
+
+interface ITest {
+  prop1: number;
+}
+
+export default ITest;
+
+--------------------------------------------
+@SomeDirectory\TestClass.type.ts
+
+import ITest from './ITest.type';
+
+interface TestClass extends ITest {
+  prop2: number;
+}
+
+export default TestClass;

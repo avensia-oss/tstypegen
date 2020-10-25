@@ -48,6 +48,7 @@
     <EmbeddedResource Include="TestCases\generates dot net type name as jsdoc comment if requested.txt" />
     <EmbeddedResource Include="TestCases\imports with name collision work.txt" />
     <EmbeddedResource Include="TestCases\imports work.txt" />
+    <EmbeddedResource Include="TestCases\interface implementation is typescript inheritance for interfaces with default implementations.txt" />
     <EmbeddedResource Include="TestCases\interface implementation is not typescript inheritance.txt" />
     <EmbeddedResource Include="TestCases\interfaces can be generated.txt" />
     <EmbeddedResource Include="TestCases\IStructuralSubsetOf works.txt" />
