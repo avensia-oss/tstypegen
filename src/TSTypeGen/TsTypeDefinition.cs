@@ -112,7 +112,16 @@ namespace TSTypeGen
 
                 if (Processor.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
                 {
-                    result.AppendLine($"{indent}/** @DotNetTypeName {GetFullNamespaceName(_type)}.{_type.Name},{_type.ContainingAssembly.Name} */");
+                    var dotNetTypeAttr = _type.GetAttributes().FirstOrDefault(a =>
+                        a.AttributeClass?.Name == Program.GenerateTypeScriptDotNetNameAttributeName &&
+                        a.ConstructorArguments.Length == 1
+                    );
+
+                    var type = _type;
+                    if (dotNetTypeAttr?.ConstructorArguments[0].Value is INamedTypeSymbol nt)
+                        type = nt;
+
+                    result.AppendLine($"{indent}/** @DotNetTypeName {GetFullNamespaceName(type)}.{type.Name},{type.ContainingAssembly.Name} */");
                 }
 
                 result.Append($"{indent}interface {Name}");

@@ -26,6 +26,7 @@ namespace TSTypeGen.Tests
                     public sealed class GenerateTypeScriptDerivedTypesUnionAttribute : Attribute { public GenerateTypeScriptDerivedTypesUnionAttribute(string name = null) {} }
                     public sealed class GenerateTypeScriptTypeMemberAttribute : Attribute { public GenerateTypeScriptTypeMemberAttribute(string name = null) {} }
                     public sealed class GenerateTypeScriptConstEnumAttribute : Attribute {}
+                    public sealed class GenerateTypeScriptDotNetNameAttribute : Attribute { public GenerateTypeScriptDotNetNameAttribute(Type type) {} }
                     public sealed class CustomTypeScriptIgnoreAttribute : Attribute {}
                     public interface IStructuralSubsetOf<T> {}
                     public interface IPartialContentData {}

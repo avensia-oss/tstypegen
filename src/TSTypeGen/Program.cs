@@ -20,6 +20,7 @@ namespace TSTypeGen
         public const string GenerateTypeScriptDerivedTypesUnionAttributeName = "GenerateTypeScriptDerivedTypesUnionAttribute";
         public const string GenerateTypeScriptTypeMemberAttributeName = "GenerateTypeScriptTypeMemberAttribute";
         public const string GenerateTypeScriptTypeConstEnumAttributeName = "GenerateTypeScriptConstEnumAttribute";
+        public const string GenerateTypeScriptDotNetNameAttributeName = "GenerateTypeScriptDotNetNameAttribute";
 
         public const string DefaultTypeMemberName = "$type";
 

@@ -34,6 +34,7 @@
     <EmbeddedResource Include="TestCases\class inheritance works.txt" />
     <EmbeddedResource Include="TestCases\DefineTypeScriptTypeForExternalTypeAttribute works.txt" />
     <EmbeddedResource Include="TestCases\dictionaries are generated as types with indexers.txt" />
+    <EmbeddedResource Include="TestCases\can generate dotnet type name.txt" />
     <EmbeddedResource Include="TestCases\empty type works.txt" />
     <EmbeddedResource Include="TestCases\enum is generated as const enum if config says so.txt" />
     <EmbeddedResource Include="TestCases\enum is generated as const enum if specified.txt" />

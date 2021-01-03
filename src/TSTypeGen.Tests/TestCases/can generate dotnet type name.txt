@@ -1,0 +1,48 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+[assembly: GenerateDotNetTypeNamesAsJsDocComment]
+namespace Test {
+    [GenerateTypeScriptDefinition]
+    public class TestClass1 {
+
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass2 {
+
+    }
+
+    [GenerateTypeScriptDefinition]
+    [GenerateTypeScriptDotNetName(typeof(TestClass1)]
+    public class TestClass3 {
+
+    }
+}
+
+--------------------------------------------
+@SomeDirectory\TestClass1.type.ts
+
+/** @DotNetTypeName Test.TestClass1,Test */
+interface TestClass1 {
+}
+
+export default TestClass1;
+
+--------------------------------------------
+@SomeDirectory\TestClass2.type.ts
+
+/** @DotNetTypeName Test.TestClass2,Test */
+interface TestClass2 {
+}
+
+export default TestClass2;
+
+--------------------------------------------
+@SomeDirectory\TestClass3.type.ts
+
+/** @DotNetTypeName Test.TestClass1,Test */
+interface TestClass3 {
+}
+
+export default TestClass3;
