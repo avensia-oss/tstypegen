@@ -35,21 +35,24 @@ namespace TSTypeGen
                     {
                         if (i.Key.ImportName == i.Value)
                         {
-                            imports.AppendLine($"import {{ {i.Value} }} from '{path}';");
+                            imports.Append($"import {{ {i.Value} }} from '{path}';");
+                            imports.Append(getSourceConfig.NewLine);
                         }
                         else
                         {
-                            imports.AppendLine($"import {{ {i.Key.ImportName} as {i.Value} }} from '{path}';");
+                            imports.Append($"import {{ {i.Key.ImportName} as {i.Value} }} from '{path}';");
+                            imports.Append(getSourceConfig.NewLine);
                         }
                     }
                     else
                     {
-                        imports.AppendLine($"import {i.Value} from '{path}';");
+                        imports.Append($"import {i.Value} from '{path}';");
+                        imports.Append(getSourceConfig.NewLine);
                     }
                 }
             }
 
-            return hasImport ? imports.ToString() + getSourceConfig.NewLine + source : source;
+            return hasImport ? imports + getSourceConfig.NewLine + source : source;
         }
     }
 }

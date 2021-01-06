@@ -121,7 +121,8 @@ namespace TSTypeGen
                     if (dotNetTypeAttr?.ConstructorArguments[0].Value is INamedTypeSymbol nt)
                         type = nt;
 
-                    result.AppendLine($"{indent}/** @DotNetTypeName {GetFullNamespaceName(type)}.{type.Name},{type.ContainingAssembly.Name} */");
+                    result.Append($"{indent}/** @DotNetTypeName {GetFullNamespaceName(type)}.{type.Name},{type.ContainingAssembly.Name} */");
+                    result.Append(config.NewLine);
                 }
 
                 result.Append($"{indent}interface {Name}");
@@ -141,12 +142,14 @@ namespace TSTypeGen
                     }
                 }
 
-                result.AppendLine(" {");
+                result.Append(" {");
+                result.Append(config.NewLine);
 
                 if (_typeMemberName != null)
                 {
                     // TODO: Should the value here be configurable? Perhaps you want the FQN?
-                    result.AppendLine($"{indent}  {_typeMemberName}: '{Name}';");
+                    result.Append($"{indent}  {_typeMemberName}: '{Name}';");
+                    result.Append(config.NewLine);
                 }
 
                 foreach (var m in _members)
@@ -159,32 +162,42 @@ namespace TSTypeGen
                         else if (m.Type.IsOptional)
                             optional = config.UseOptionalForNullables ? "?" : "";
                     }
-                    result.AppendLine($"{indent}  {FixName(m.Name)}{optional}: {m.Type.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)};");
+                    result.Append($"{indent}  {FixName(m.Name)}{optional}: {m.Type.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)};");
+                    result.Append(config.NewLine);
                 }
 
-                result.Append(indent).AppendLine("}");
+                result.Append(indent).Append("}");
+                result.Append(config.NewLine);
 
                 if (_derivedTypesUnionGeneration?.DerivedTypeReferences.Length > 0)
                 {
-                    result.AppendLine();
-                    result.AppendLine($"{indent}type {_derivedTypesUnionGeneration.DerivedTypesUnionName} = {string.Join(" | ", _derivedTypesUnionGeneration.DerivedTypeReferences.Select(t => t.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)))};");
+                    result.Append(config.NewLine);
+                    result.Append($"{indent}type {_derivedTypesUnionGeneration.DerivedTypesUnionName} = {string.Join(" | ", _derivedTypesUnionGeneration.DerivedTypeReferences.Select(t => t.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)))};");
+                    result.Append(config.NewLine);
                 }
 
                 if (!isNamespaceFile)
                 {
                     if (_derivedTypesUnionGeneration?.DerivedTypeReferences.Length > 0)
                     {
-                        result.AppendLine().AppendLine($"export {_derivedTypesUnionGeneration.DerivedTypesUnionName};");
+                        result.Append(config.NewLine);
+                        result.Append($"export {_derivedTypesUnionGeneration.DerivedTypesUnionName};");
+                        result.Append(config.NewLine);
                     }
 
-                    result.AppendLine().AppendLine($"export default {Name};");
+                    result.Append(config.NewLine);
+                    result.Append($"export default {Name};");
+                    result.Append(config.NewLine);
 
                     foreach (var type in _mustBeAssignableFrom)
                     {
-                        result.AppendLine()
-                              .AppendLine($"// This type must be a structural subset of {type.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)}. A compilation error on the next line means that this is not the case.")
-                              .AppendLine("// Note, however, that the error message from TypeScript might be bad or misleading.")
-                              .AppendLine($"(function() {{ const v: {Name} = {{}} as {type.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)}; return v; }});");
+                        result.Append(config.NewLine)
+                              .Append($"// This type must be a structural subset of {type.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)}. A compilation error on the next line means that this is not the case.")
+                              .Append(config.NewLine)
+                              .Append("// Note, however, that the error message from TypeScript might be bad or misleading.")
+                              .Append(config.NewLine)
+                              .Append($"(function() {{ const v: {Name} = {{}} as {type.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)}; return v; }});")
+                              .Append(config.NewLine);
                     }
                 }
 
@@ -230,12 +243,15 @@ namespace TSTypeGen
 
                 if (_useConstEnum || config.UseConstEnums)
                 {
-                    sb.AppendLine($"{indent}const enum {Name} {{");
+                    sb.Append($"{indent}const enum {Name} {{");
+                    sb.Append(config.NewLine);
                     foreach (var member in _members)
                     {
-                        sb.AppendLine($"{indent}  {member} = '{StringUtils.ToCamelCase(member)}',");
+                        sb.Append($"{indent}  {member} = '{StringUtils.ToCamelCase(member)}',");
+                        sb.Append(config.NewLine);
                     }
-                    sb.AppendLine($"{indent}}}");
+                    sb.Append($"{indent}}}");
+                    sb.Append(config.NewLine);
                 }
                 else
                 {
@@ -252,12 +268,13 @@ namespace TSTypeGen
                     {
                         sb.Append("{}");
                     }
-                    sb.AppendLine(";");
+                    sb.Append(";");
+                    sb.Append(config.NewLine);
                 }
 
                 if (!isNamespaceFile)
                 {
-                    sb.AppendLine().Append("export default ").Append(Name).AppendLine(";");
+                    sb.Append(config.NewLine).Append("export default ").Append(Name).Append(";").Append(config.NewLine);
                 }
 
                 return sb.ToString();

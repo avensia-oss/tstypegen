@@ -31,7 +31,7 @@ namespace TSTypeGen
             {
                 if (!first)
                 {
-                    innerSource.AppendLine();
+                    innerSource.Append(getSourceConfig.NewLine);
                 }
                 var tsTypeDefinition = await TypeBuilder.BuildTsTypeDefinitionAsync(t, typeBuilderConfig, solution);
                 innerSource.Append(tsTypeDefinition.GetSource(FilePath, getSourceConfig, true, importMappings));
@@ -41,7 +41,8 @@ namespace TSTypeGen
             var importSource = new StringBuilder();
             foreach (var i in importMappings)
             {
-                importSource.AppendLine($"    type {i.Value} = import('{GetImportPath(i.Key.FilePath, getSourceConfig)}').{i.Key.ImportName ?? "default"};");
+                importSource.Append($"    type {i.Value} = import('{GetImportPath(i.Key.FilePath, getSourceConfig)}').{i.Key.ImportName ?? "default"};");
+                importSource.Append(getSourceConfig.NewLine);
             }
 
             if (importSource.Length > 0)
@@ -54,7 +55,7 @@ namespace TSTypeGen
             }
             else
             {
-                return "declare namespace " + _namespaceName + " {" + getSourceConfig.NewLine + innerSource.ToString() + "}" + getSourceConfig.NewLine;
+                return "declare namespace " + _namespaceName + " {" + getSourceConfig.NewLine + innerSource + "}" + getSourceConfig.NewLine;
             }
         }
     }
