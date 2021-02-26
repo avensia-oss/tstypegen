@@ -1,0 +1,49 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using System.Collections.Generic;
+[assembly: GenerateTypeScriptNamespace("test")]
+namespace Test.Testing {
+    [GenerateTypeScriptDefinition]
+    public interface TestInterface1 {
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    [TypeScriptAugumentParent]
+    public class TestClass1 : TestInterface1 {
+        public int Prop2 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestBaseClass2 {
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    [TypeScriptAugumentParent]
+    public class TestClass2 : TestBaseClass2 {
+        public int Prop2 { get; set; }
+    }
+}
+
+--------------------------------------------
+@test.d.ts
+
+declare namespace test {
+  interface TestBaseClass2 {
+    prop1: number;
+  }
+
+  interface TestInterface1 {
+    prop2: number;
+  }
+
+  interface TestBaseClass2 {
+    prop2: number;
+  }
+
+  interface TestInterface1 {
+    prop1: number;
+  }
+}

@@ -331,6 +331,22 @@ namespace TSTypeGen
             return typeMemberName;
         }
 
+        internal static INamedTypeSymbol GetParentTypeToAugument(INamedTypeSymbol type)
+        {
+            var attr = type.GetAttributes().FirstOrDefault(a => a.AttributeClass.Name == Program.TypeScriptAugumentParentAttributeName);
+
+            if (attr != null)
+            {
+                var baseTypes = type.Interfaces.ToList();
+                if (type.BaseType != null && type.BaseType.SpecialType != SpecialType.System_Object)
+                    baseTypes.Insert(0, type.BaseType);
+
+                return baseTypes.FirstOrDefault();
+            }
+
+            return null;
+        }
+
         public static async Task<TsTypeDefinition> BuildTsTypeDefinitionAsync(INamedTypeSymbol type, TypeBuilderConfig config, Solution solution)
         {
             var tsNamespace = Processor.GetTypescriptNamespace(type);
@@ -376,6 +392,13 @@ namespace TSTypeGen
                         extends.Add(iface);
                 }
 
+                var parentToAugument = GetParentTypeToAugument(type);
+                var parentDefToAugument = default(TsTypeDefinition);
+                if (parentToAugument != null)
+                {
+                    parentDefToAugument = await BuildTsTypeDefinitionAsync(parentToAugument, config, solution);
+                }
+
                 bool wrapMembers = type.AllInterfaces.Any(i => { var s = i.ToDisplayString(); return config.TypesToWrapPropertiesFor.Contains(s); });
                 return TsTypeDefinition.Interface(type,
                                                   properties.Select(p => BuildMember(p, type.Interfaces, config, tsNamespace)).Where(x => x != null).Select(p => wrapMembers ? WrapProperty(p, config) : p),
@@ -383,6 +406,7 @@ namespace TSTypeGen
                                                   type.TypeParameters.Select(tp => tp.Name),
                                                   GetMustBeAssignableFromList(type, config, tsNamespace),
                                                   await GetDerivedTypesAsync(type, config, tsNamespace, solution),
+                                                  parentDefToAugument,
                                                   GetTypeMemberName(type));
             }
         }

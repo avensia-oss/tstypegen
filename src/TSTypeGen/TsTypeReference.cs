@@ -49,6 +49,8 @@ namespace TSTypeGen
             return new ImportedTsTypeReference(name, sourceFile, false, isOptional);
         }
 
+        public abstract bool Equals(TsTypeDefinition tsTypeDefinition);
+
         private class SimpleTsTypeReference : TsTypeReference
         {
             private readonly string _type;
@@ -66,6 +68,11 @@ namespace TSTypeGen
 
             protected override void GatherImportedModules(List<ImportedModule> list)
             {
+            }
+
+            public override bool Equals(TsTypeDefinition tsTypeDefinition)
+            {
+                return _type == tsTypeDefinition.Name;
             }
         }
 
@@ -100,6 +107,11 @@ namespace TSTypeGen
                     a.GatherImportedModules(list);
                 }
             }
+
+            public override bool Equals(TsTypeDefinition tsTypeDefinition)
+            {
+                return _genericType.Equals(tsTypeDefinition);
+            }
         }
 
         private class ImportedTsTypeReference : TsTypeReference
@@ -126,6 +138,11 @@ namespace TSTypeGen
             {
                 list.Add(_isDefaultImport ? ImportedModule.DefaultImport(_name, _sourceFile) : ImportedModule.NamedImport(_name, _sourceFile, _name));
             }
+
+            public override bool Equals(TsTypeDefinition tsTypeDefinition)
+            {
+                return _name == tsTypeDefinition.Name;
+            }
         }
 
         private class ArrayTsTypeReference : TsTypeReference
@@ -147,6 +164,11 @@ namespace TSTypeGen
             protected override void GatherImportedModules(List<ImportedModule> list)
             {
                 _itemType.GatherImportedModules(list);
+            }
+
+            public override bool Equals(TsTypeDefinition tsTypeDefinition)
+            {
+                return false;
             }
         }
 
@@ -173,6 +195,11 @@ namespace TSTypeGen
             {
                 _keyType.GatherImportedModules(list);
                 _valueType.GatherImportedModules(list);
+            }
+
+            public override bool Equals(TsTypeDefinition tsTypeDefinition)
+            {
+                return false;
             }
         }
     }

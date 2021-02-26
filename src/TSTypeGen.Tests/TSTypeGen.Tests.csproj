@@ -72,6 +72,7 @@
     <EmbeddedResource Include="TestCases\types in custom namespaces can reference modules as properties.txt" />
     <EmbeddedResource Include="TestCases\types in custom namespaces can reference modules when inheriting.txt" />
     <EmbeddedResource Include="TestCases\types in generated modules can reference namespaced types.txt" />
+    <EmbeddedResource Include="TestCases\TypeScriptAugumentParentAttribute works.txt" />
     <EmbeddedResource Include="TestCases\TypeScriptTypeAttribute can be used on a type.txt" />
     <EmbeddedResource Include="TestCases\TypeScriptTypeAttribute can be used to change the generated type of a property.txt" />
     <EmbeddedResource Include="TestCases\TypeScriptTypeAttribute wins over JsonIgnoreAttribute.txt" />

@@ -16,6 +16,7 @@ namespace TSTypeGen
         public const string GenerateCanonicalDotNetTypeScriptTypeAttributeAttributeName = "GenerateCanonicalDotNetTypeScriptTypeAttribute";
         public const string DefineTypeScriptTypeForExternalTypeAttributeName = "DefineTypeScriptTypeForExternalTypeAttribute";
         public const string TypeScriptTypeAttributeName = "TypeScriptTypeAttribute";
+        public const string TypeScriptAugumentParentAttributeName = "TypeScriptAugumentParentAttribute";
         public const string TypeScriptOptionalAttributeName = "TypeScriptOptionalAttribute";
         public const string TypeScriptIgnoreAttributeName = "TypeScriptIgnoreAttribute";
         public const string GenerateTypeScriptDerivedTypesUnionAttributeName = "GenerateTypeScriptDerivedTypesUnionAttribute";

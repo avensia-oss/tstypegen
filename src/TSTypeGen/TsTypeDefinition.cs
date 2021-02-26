@@ -20,9 +20,18 @@ namespace TSTypeGen
             Name = name;
         }
 
-        public static TsTypeDefinition Interface(INamedTypeSymbol type, IEnumerable<TsInterfaceMember> members, IEnumerable<TsTypeReference> extends, IEnumerable<string> typeParameters, IEnumerable<TsTypeReference> mustBeAssignableFrom, DerivedTypesUnionGeneration derivedTypesUnionGeneration, string typeMemberName)
+        public static TsTypeDefinition Interface(
+            INamedTypeSymbol type,
+            IEnumerable<TsInterfaceMember> members,
+            IEnumerable<TsTypeReference> extends,
+            IEnumerable<string> typeParameters,
+            IEnumerable<TsTypeReference> mustBeAssignableFrom,
+            DerivedTypesUnionGeneration derivedTypesUnionGeneration,
+            TsTypeDefinition parentToAugument,
+            string typeMemberName
+        )
         {
-            return new InterfaceType(type, members, extends, typeParameters, mustBeAssignableFrom, derivedTypesUnionGeneration, typeMemberName);
+            return new InterfaceType(type, members, extends, typeParameters, mustBeAssignableFrom, derivedTypesUnionGeneration, parentToAugument, typeMemberName);
         }
 
         public static TsTypeDefinition Enum(string name, IEnumerable<string> members, bool useConstEnum)
@@ -38,6 +47,7 @@ namespace TSTypeGen
             private readonly ImmutableArray<TsTypeReference> _mustBeAssignableFrom;
             private readonly INamedTypeSymbol _type;
             private readonly DerivedTypesUnionGeneration _derivedTypesUnionGeneration;
+            private readonly TsTypeDefinition _parentToAugument;
             private readonly string _typeMemberName;
 
             public InterfaceType(
@@ -47,6 +57,7 @@ namespace TSTypeGen
                 IEnumerable<string> typeParameters,
                 IEnumerable<TsTypeReference> mustBeAssignableFrom,
                 DerivedTypesUnionGeneration derivedTypesUnionGeneration,
+                TsTypeDefinition parentToAugument,
                 string typeMemberName
             ) : base(type.Name)
             {
@@ -56,6 +67,7 @@ namespace TSTypeGen
                 _mustBeAssignableFrom = ImmutableArray.CreateRange(mustBeAssignableFrom);
                 _type = type;
                 _derivedTypesUnionGeneration = derivedTypesUnionGeneration;
+                _parentToAugument = parentToAugument;
                 _typeMemberName = typeMemberName;
             }
 
@@ -110,6 +122,10 @@ namespace TSTypeGen
 
                 EnsureImports(importMappings);
 
+                var name = Name;
+                if (_parentToAugument != null)
+                    name = _parentToAugument.Name;
+
                 if (Processor.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
                 {
                     var dotNetTypeAttr = _type.GetAttributes().FirstOrDefault(a =>
@@ -143,7 +159,7 @@ namespace TSTypeGen
                     result.Append(config.NewLine);
                 }
 
-                result.Append($"{indent}interface {Name}");
+                result.Append($"{indent}interface {name}");
                 if (_typeParameters.Length > 0)
                 {
                     result.Append("<")
@@ -153,10 +169,15 @@ namespace TSTypeGen
 
                 if (_extends.Length > 0)
                 {
-                    result.Append(" extends ").Append(_extends[0].GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings));
-                    for (int i = 1; i < _extends.Length; i++)
+                    var extends = _parentToAugument != null ? _extends.Where(e => !e.Equals(_parentToAugument)).ToList() : _extends.ToList();
+
+                    if (extends.Any())
                     {
-                        result.Append(", ").Append(_extends[i].GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings));
+                        result.Append(" extends ").Append(extends[0].GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings));
+                        for (int i = 1; i < extends.Count; i++)
+                        {
+                            result.Append(", ").Append(extends[i].GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings));
+                        }
                     }
                 }
 
@@ -166,7 +187,7 @@ namespace TSTypeGen
                 if (_typeMemberName != null)
                 {
                     // TODO: Should the value here be configurable? Perhaps you want the FQN?
-                    result.Append($"{indent}  {_typeMemberName}: '{Name}';");
+                    result.Append($"{indent}  {_typeMemberName}: '{name}';");
                     result.Append(config.NewLine);
                 }
 
