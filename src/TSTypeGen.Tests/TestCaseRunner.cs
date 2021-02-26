@@ -241,7 +241,7 @@ $@"<Project ToolsVersion=""14.0"" DefaultTargets=""Build"" xmlns=""http://schema
                 string message = $"Error in {expectedFile.Path}\nExpected:\n{currentExpected}\n\nActual:\n{currentActual}".Replace("\n", Environment.NewLine);
                 Assert.That(currentActual, Is.EqualTo(currentExpected), message);
             }
-            
+
         }
 
         public static string[] GetTestCases()

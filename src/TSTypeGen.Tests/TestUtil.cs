@@ -19,6 +19,7 @@ namespace TSTypeGen.Tests
                     public sealed class GenerateTypeScriptDefinitionAttribute : Attribute { public GenerateTypeScriptDefinitionAttribute() {} public GenerateTypeScriptDefinitionAttribute(bool generate) {} }
                     public sealed class GenerateTypeScriptNamespaceAttribute : Attribute { public GenerateTypeScriptNamespaceAttribute(string name) {} }
                     public sealed class GenerateDotNetTypeNamesAsJsDocCommentAttribute : Attribute { public GenerateDotNetTypeNamesAsJsDocCommentAttribute() {} }
+                    public sealed class GenerateCanonicalDotNetTypeScriptTypeAttribute : Attribute { public GenerateCanonicalDotNetTypeScriptTypeAttribute() {} }
                     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)] public sealed class DefineTypeScriptTypeForExternalTypeAttribute : Attribute { public DefineTypeScriptTypeForExternalTypeAttribute(Type type, string name) {} public DefineTypeScriptTypeForExternalTypeAttribute(string qualifiedTypeName, string name) {} }
                     public sealed class TypeScriptTypeAttribute : Attribute { public TypeScriptTypeAttribute(Type type) {} public TypeScriptTypeAttribute(string type) {} }
                     public sealed class TypeScriptOptionalAttribute : Attribute {}

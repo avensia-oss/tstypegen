@@ -42,6 +42,7 @@
     <EmbeddedResource Include="TestCases\enumerable properties are generated as arrays.txt" />
     <EmbeddedResource Include="TestCases\fields of type union types are generated as the union.txt" />
     <EmbeddedResource Include="TestCases\GenerateTypeScriptDefinition can disable generation of a nested type.txt" />
+    <EmbeddedResource Include="TestCases\GenerateCanonicalDotNetTypeScriptTypeAttribute works.txt" />
     <EmbeddedResource Include="TestCases\generating a namespace works.txt" />
     <EmbeddedResource Include="TestCases\generating types into different namespaces works for namespace assemblies.txt" />
     <EmbeddedResource Include="TestCases\generating types into different namespaces works.txt" />

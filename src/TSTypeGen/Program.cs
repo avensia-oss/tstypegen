@@ -13,6 +13,7 @@ namespace TSTypeGen
         public const string GenerateTypeScriptDefinitionAttributeName = "GenerateTypeScriptDefinitionAttribute";
         public const string GenerateTypeScriptNamespaceAttributeName = "GenerateTypeScriptNamespaceAttribute";
         public const string GenerateDotNetTypeNamesAsJsDocCommentAttributeName = "GenerateDotNetTypeNamesAsJsDocCommentAttribute";
+        public const string GenerateCanonicalDotNetTypeScriptTypeAttributeAttributeName = "GenerateCanonicalDotNetTypeScriptTypeAttribute";
         public const string DefineTypeScriptTypeForExternalTypeAttributeName = "DefineTypeScriptTypeForExternalTypeAttribute";
         public const string TypeScriptTypeAttributeName = "TypeScriptTypeAttribute";
         public const string TypeScriptOptionalAttributeName = "TypeScriptOptionalAttribute";

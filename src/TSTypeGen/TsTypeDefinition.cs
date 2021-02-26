@@ -121,7 +121,25 @@ namespace TSTypeGen
                     if (dotNetTypeAttr?.ConstructorArguments[0].Value is INamedTypeSymbol nt)
                         type = nt;
 
-                    result.Append($"{indent}/** @DotNetTypeName {GetFullNamespaceName(type)}.{type.Name},{type.ContainingAssembly.Name} */");
+                    var canonicalType = Processor.GetCanonicalDotNetType(type);
+                    var dotNetTypeComment = $"@DotNetTypeName {GetFullNamespaceName(type)}.{type.Name},{type.ContainingAssembly.Name}";
+
+                    result.Append($"{indent}/**");
+
+                    if (canonicalType != null)
+                    {
+                        result.Append(config.NewLine);
+                        result.Append($"{indent} * {dotNetTypeComment}");
+                        result.Append(config.NewLine);
+                        result.Append($"{indent} * @DotNetCanonicalTypeName {GetFullNamespaceName(canonicalType)}.{canonicalType.Name},{canonicalType.ContainingAssembly.Name}");
+                        result.Append(config.NewLine);
+                        result.Append($"{indent} */");
+                    }
+                    else
+                    {
+                        result.Append($" {dotNetTypeComment} */");
+                    }
+
                     result.Append(config.NewLine);
                 }
 

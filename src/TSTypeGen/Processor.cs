@@ -564,6 +564,27 @@ namespace TSTypeGen
             return DoShouldGenerateDotNetTypeNamesAsJsDocComment(type.ContainingAssembly);
         }
 
+        internal static INamedTypeSymbol GetCanonicalDotNetType(INamedTypeSymbol type)
+        {
+            var baseTypes = type.Interfaces.ToList();
+            if (type.BaseType != null)
+                baseTypes.Add(type.BaseType);
+
+            foreach (var baseType in baseTypes)
+            {
+                var attr = baseType.GetAttributes().FirstOrDefault(a => a.AttributeClass.Name == Program.GenerateCanonicalDotNetTypeScriptTypeAttributeAttributeName);
+
+                if (attr != null)
+                    return baseType;
+
+                var parentCanonical = GetCanonicalDotNetType(baseType);
+                if (parentCanonical != null)
+                    return parentCanonical;
+            }
+
+            return null;
+        }
+
         private static async Task<bool> ShouldIgnoreProjectAsync(Project project)
         {
             var compilation = await project.GetCompilationAsync();

@@ -1,0 +1,98 @@
+﻿@SomeDirectory\TestClass.cs
+
+using Avensia;
+using System.Collections.Generic;
+using Test2;
+[assembly: GenerateTypeScriptNamespace("test")]
+[assembly: GenerateDotNetTypeNamesAsJsDocComment()]
+namespace Test.Testing {
+    [GenerateTypeScriptDefinition]
+    [GenerateCanonicalDotNetTypeScriptType]
+    public interface TestInterface1 {
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass1 : TestInterface1 {
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    [GenerateCanonicalDotNetTypeScriptType]
+    public class TestBaseClass2 {
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass2 : TestBaseClass2 {
+        public int Prop2 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    [GenerateCanonicalDotNetTypeScriptType]
+    public interface TestInterface3 {
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestBaseClass3 : TestInterface3 {
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClass3 : TestBaseClass3 {
+        public int Prop2 { get; set; }
+    }
+}
+
+--------------------------------------------
+@test.d.ts
+
+declare namespace test {
+  /** @DotNetTypeName Test.Testing.TestBaseClass2,Test */
+  interface TestBaseClass2 {
+    prop1: number;
+  }
+
+  /**
+   * @DotNetTypeName Test.Testing.TestBaseClass3,Test
+   * @DotNetCanonicalTypeName Test.Testing.TestInterface3,Test
+   */
+  interface TestBaseClass3 {
+    prop1: number;
+  }
+
+  /**
+   * @DotNetTypeName Test.Testing.TestClass1,Test
+   * @DotNetCanonicalTypeName Test.Testing.TestInterface1,Test
+   */
+  interface TestClass1 {
+    prop1: number;
+  }
+
+  /**
+   * @DotNetTypeName Test.Testing.TestClass2,Test
+   * @DotNetCanonicalTypeName Test.Testing.TestBaseClass2,Test
+   */
+  interface TestClass2 extends TestBaseClass2 {
+    prop2: number;
+  }
+
+  /**
+   * @DotNetTypeName Test.Testing.TestClass3,Test
+   * @DotNetCanonicalTypeName Test.Testing.TestInterface3,Test
+   */
+  interface TestClass3 extends TestBaseClass3 {
+    prop2: number;
+  }
+
+  /** @DotNetTypeName Test.Testing.TestInterface1,Test */
+  interface TestInterface1 {
+    prop1: number;
+  }
+
+  /** @DotNetTypeName Test.Testing.TestInterface3,Test */
+  interface TestInterface3 {
+    prop1: number;
+  }
+}
