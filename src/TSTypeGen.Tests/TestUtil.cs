@@ -22,6 +22,7 @@ namespace TSTypeGen.Tests
                     public sealed class GenerateCanonicalDotNetTypeScriptTypeAttribute : Attribute { public GenerateCanonicalDotNetTypeScriptTypeAttribute() {} }
                     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)] public sealed class DefineTypeScriptTypeForExternalTypeAttribute : Attribute { public DefineTypeScriptTypeForExternalTypeAttribute(Type type, string name) {} public DefineTypeScriptTypeForExternalTypeAttribute(string qualifiedTypeName, string name) {} }
                     public sealed class TypeScriptTypeAttribute : Attribute { public TypeScriptTypeAttribute(Type type) {} public TypeScriptTypeAttribute(string type) {} }
+                    [TypeScriptType(\""string"")] public class TypeScriptStringAttribute : Attribute {}
                     public sealed class TypeScriptOptionalAttribute : Attribute {}
                     public sealed class TypeScriptAugumentParentAttribute : Attribute {}
                     public sealed class TypeScriptIgnoreAttribute : Attribute {}

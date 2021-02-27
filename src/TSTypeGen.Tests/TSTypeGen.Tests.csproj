@@ -32,6 +32,7 @@
     <EmbeddedResource Include="TestCases\can generate a type member.txt" />
     <EmbeddedResource Include="TestCases\can use root path and path aliases for imports.txt" />
     <EmbeddedResource Include="TestCases\class inheritance works.txt" />
+    <EmbeddedResource Include="TestCases\custom attributes can have TypeScriptType attribute.txt" />
     <EmbeddedResource Include="TestCases\DefineTypeScriptTypeForExternalTypeAttribute works.txt" />
     <EmbeddedResource Include="TestCases\dictionaries are generated as types with indexers.txt" />
     <EmbeddedResource Include="TestCases\can generate dotnet type name.txt" />

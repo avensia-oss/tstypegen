@@ -92,7 +92,7 @@ namespace TSTypeGen
         private static TsTypeReference BuildTsTypeReferenceToPropertyType(IPropertySymbol property, TypeBuilderConfig config, string currentTsNamespace)
         {
             ITypeSymbol type = property.Type;
-            var typeScriptTypeAttribute = property.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == Program.TypeScriptTypeAttributeName && a.ConstructorArguments.Length == 1);
+            var typeScriptTypeAttribute = GetTypeScriptTypeAttribute(property);
             if (typeScriptTypeAttribute != null)
             {
                 if (typeScriptTypeAttribute.ConstructorArguments[0].Value is string typeString)
@@ -106,6 +106,29 @@ namespace TSTypeGen
             }
 
             return BuildTsTypeReference(type, config, currentTsNamespace, false);
+        }
+
+        private static AttributeData GetTypeScriptTypeAttribute(IPropertySymbol property)
+        {
+            var attributes = property.GetAttributes();
+
+            var explicitTypeAttribute = attributes.FirstOrDefault(a => a.AttributeClass?.Name == Program.TypeScriptTypeAttributeName && a.ConstructorArguments.Length == 1);
+            if (explicitTypeAttribute != null)
+                return explicitTypeAttribute;
+
+            foreach (var attribute in attributes)
+            {
+                if (attribute.AttributeClass != null)
+                {
+                    var attributeAttributes = attribute.AttributeClass.GetAttributes();
+
+                    var attributeAttribute = attributeAttributes.FirstOrDefault(a => a.AttributeClass?.Name == Program.TypeScriptTypeAttributeName && a.ConstructorArguments.Length == 1);
+                    if (attributeAttribute != null)
+                        return attributeAttribute;
+                }
+            }
+
+            return null;
         }
 
         private static TsTypeReference BuildTsTypeReference(ITypeSymbol type, TypeBuilderConfig config, string currentTsNamespace, bool returnTheMainTypeEvenIfItHasADerivedTypesUnion)
