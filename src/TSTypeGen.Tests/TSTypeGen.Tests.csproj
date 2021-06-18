@@ -2,90 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>8</LangVersion>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Locator" Version="1.2.6" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.7.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.7.0" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="5.0.0" />
     <PackageReference Include="Mono.Options" Version="6.6.0.161" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="nunit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="NuGet.ProjectModel" Version="5.7.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+    <PackageReference Include="System.CodeDom" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TSTypeGen.Tests.Main\TSTypeGen.Tests.Main.csproj" />
     <ProjectReference Include="..\TSTypeGen\TSTypeGen.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="TestCases\all nested types inside a generated type are also generated.txt" />
-    <EmbeddedResource Include="TestCases\all nested types inside a generated type with a namespace are also generated.txt" />
-    <EmbeddedResource Include="TestCases\can build a union type of all child classes.txt" />
-    <EmbeddedResource Include="TestCases\can generate a type member.txt" />
-    <EmbeddedResource Include="TestCases\can use root path and path aliases for imports.txt" />
-    <EmbeddedResource Include="TestCases\class inheritance works.txt" />
-    <EmbeddedResource Include="TestCases\custom attributes can have TypeScriptType attribute.txt" />
-    <EmbeddedResource Include="TestCases\DefineTypeScriptTypeForExternalTypeAttribute works.txt" />
-    <EmbeddedResource Include="TestCases\dictionaries are generated as types with indexers.txt" />
-    <EmbeddedResource Include="TestCases\can generate dotnet type name.txt" />
-    <EmbeddedResource Include="TestCases\empty type works.txt" />
-    <EmbeddedResource Include="TestCases\enum is generated as const enum if config says so.txt" />
-    <EmbeddedResource Include="TestCases\enum is generated as const enum if specified.txt" />
-    <EmbeddedResource Include="TestCases\enum is generated as string union type if config says so.txt" />
-    <EmbeddedResource Include="TestCases\enumerable properties are generated as arrays.txt" />
-    <EmbeddedResource Include="TestCases\fields of type union types are generated as the union.txt" />
-    <EmbeddedResource Include="TestCases\GenerateTypeScriptDefinition can disable generation of a nested type.txt" />
-    <EmbeddedResource Include="TestCases\GenerateCanonicalDotNetTypeScriptTypeAttribute works.txt" />
-    <EmbeddedResource Include="TestCases\generating a namespace works.txt" />
-    <EmbeddedResource Include="TestCases\generating types into different namespaces works for namespace assemblies.txt" />
-    <EmbeddedResource Include="TestCases\generating types into different namespaces works.txt" />
-    <EmbeddedResource Include="TestCases\generics work.txt" />
-    <EmbeddedResource Include="TestCases\generates dot net type name as jsdoc comment if requested.txt" />
-    <EmbeddedResource Include="TestCases\imports with name collision work.txt" />
-    <EmbeddedResource Include="TestCases\imports work.txt" />
-    <EmbeddedResource Include="TestCases\interface implementation is typescript inheritance for interfaces with default implementations.txt" />
-    <EmbeddedResource Include="TestCases\interface implementation is not typescript inheritance.txt" />
-    <EmbeddedResource Include="TestCases\interfaces can be generated.txt" />
-    <EmbeddedResource Include="TestCases\IStructuralSubsetOf works.txt" />
-    <EmbeddedResource Include="TestCases\TypeScriptIgnoreAttribute and JsonIgnoreAttribute causes property to not be generated.txt" />
-    <EmbeddedResource Include="TestCases\JsonPropertyAttribute can be used to specify the generated property name.txt" />
-    <EmbeddedResource Include="TestCases\JsonPropertyAttribute on interface member affects implementing property.txt" />
-    <EmbeddedResource Include="TestCases\multiple input files work.txt" />
-    <EmbeddedResource Include="TestCases\multiple types in the same file are generated as separate files.txt" />
-    <EmbeddedResource Include="TestCases\nullable properties are treated as their underlying type.txt" />
-    <EmbeddedResource Include="TestCases\nullable properties becomes nullable or optional with a setting.txt" />
-    <EmbeddedResource Include="TestCases\only instance properties are generated.txt" />
-    <EmbeddedResource Include="TestCases\optional properties works.txt" />
-    <EmbeddedResource Include="TestCases\properties of primitive types are correctly generated.txt" />
-    <EmbeddedResource Include="TestCases\properties can be wrapped with imported Property.txt" />
-    <EmbeddedResource Include="TestCases\properties can be wrapped with global property type.txt" />
-    <EmbeddedResource Include="TestCases\references to types with namespaces in other projects work.txt" />
-    <EmbeddedResource Include="TestCases\structs are generated.txt" />
-    <EmbeddedResource Include="TestCases\type mappings defined in config work.txt" />
-    <EmbeddedResource Include="TestCases\types in custom namespaces can reference modules as properties.txt" />
-    <EmbeddedResource Include="TestCases\types in custom namespaces can reference modules when inheriting.txt" />
-    <EmbeddedResource Include="TestCases\types in generated modules can reference namespaced types.txt" />
-    <EmbeddedResource Include="TestCases\TypeScriptAugumentParentAttribute works.txt" />
-    <EmbeddedResource Include="TestCases\TypeScriptTypeAttribute can be used on a type.txt" />
-    <EmbeddedResource Include="TestCases\TypeScriptTypeAttribute can be used to change the generated type of a property.txt" />
-    <EmbeddedResource Include="TestCases\TypeScriptTypeAttribute wins over JsonIgnoreAttribute.txt" />
-    <EmbeddedResource Include="TestCases\watch can delete a generated namespace file.txt" />
-    <EmbeddedResource Include="TestCases\watch can react to a deleted file when generating a namespace.txt" />
-    <EmbeddedResource Include="TestCases\watch can react to a deleted file when overriding namespaces.txt" />
-    <EmbeddedResource Include="TestCases\watch can react to a deleted file.txt" />
-    <EmbeddedResource Include="TestCases\watch can react to an updated file when generating a namespace.txt" />
-    <EmbeddedResource Include="TestCases\watch can react to an updated file when overriding namespaces.txt" />
-    <EmbeddedResource Include="TestCases\watch can react to an updated file with multiple classes.txt" />
-    <EmbeddedResource Include="TestCases\watch can react to an updated file.txt" />
-    <EmbeddedResource Include="TestCases\watch can react to an updated project.txt" />
   </ItemGroup>
 
 </Project>

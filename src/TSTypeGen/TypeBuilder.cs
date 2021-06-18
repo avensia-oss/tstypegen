@@ -2,32 +2,25 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.FindSymbols;
 
 namespace TSTypeGen
 {
     public class TypeBuilder
     {
-        private static bool IsNullableType(ITypeSymbol type)
+        private static string FindNameFromJsonPropertyAttribute(PropertyInfo property)
         {
-            var namedType = type as INamedTypeSymbol;
-            return namedType != null && namedType.IsGenericType && namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T;
-        }
-
-        private static string FindNameFromJsonPropertyAttribute(IPropertySymbol property)
-        {
-            string LookupSingle(IPropertySymbol p)
+            string LookupSingle(PropertyInfo p)
             {
-                var jsonPropertyAttribute = p.GetAttributes().FirstOrDefault(a => a.AttributeClass.ToDisplayString() == "Newtonsoft.Json.JsonPropertyAttribute");
+                var jsonPropertyAttribute = TypeUtils.GetCustomAttributesData(p).FirstOrDefault(a => a.AttributeType.FullName == "Newtonsoft.Json.JsonPropertyAttribute");
                 if (jsonPropertyAttribute != null)
                 {
-                    if (jsonPropertyAttribute.NamedArguments.Any(x => x.Key == "PropertyName"))
+                    if (jsonPropertyAttribute.NamedArguments?.Any(x => x.MemberName == "PropertyName") == true)
                     {
-                        return jsonPropertyAttribute.NamedArguments.First(x => x.Key == "PropertyName").Value.Value as string;
+                        return jsonPropertyAttribute.NamedArguments.First(x => x.MemberName == "PropertyName").TypedValue.Value as string;
                     }
-                    else if (jsonPropertyAttribute.ConstructorArguments.Length > 0)
+                    else if (jsonPropertyAttribute.ConstructorArguments.Count > 0)
                     {
                         return jsonPropertyAttribute.ConstructorArguments[0].Value as string;
                     }
@@ -40,39 +33,37 @@ namespace TSTypeGen
                 return result;
             }
 
-            foreach (var interfaceProperty in property.ContainingType.AllInterfaces.SelectMany(i => i.GetMembers(property.Name)).OfType<IPropertySymbol>())
+            foreach (var interfaceProperty in property.DeclaringType?.GetInterfaces().SelectMany(i => TypeUtils.GetRelevantProperties(i).Where(p => p.Name == property.Name)) ?? new List<PropertyInfo>())
             {
-                if (Equals(property.ContainingType.FindImplementationForInterfaceMember(interfaceProperty), property))
+                if (LookupSingle(interfaceProperty) is string interfaceResult)
                 {
-                    if (LookupSingle(interfaceProperty) is string interfaceResult)
-                    {
-                        return interfaceResult;
-                    }
+                    return interfaceResult;
                 }
             }
 
             return null;
         }
 
-        private static TsInterfaceMember BuildMember(IPropertySymbol property, ImmutableArray<INamedTypeSymbol> interfaces, TypeBuilderConfig config, string currentTsNamespace)
+        private static TsInterfaceMember BuildMember(PropertyInfo property, IList<Type> interfaces, TypeBuilderConfig config, string currentTsNamespace)
         {
-            var interfaceProperties = interfaces.SelectMany(i => i.GetMembers(property.Name).OfType<IPropertySymbol>());
+            var interfaceProperties = interfaces.SelectMany(i => TypeUtils.GetRelevantProperties(i).Where(p => p.Name == property.Name));
 
-            var allPropertiesToCheckForIgnore = new List<IPropertySymbol>();
+            var allPropertiesToCheckForIgnore = new List<PropertyInfo>();
             allPropertiesToCheckForIgnore.AddRange(interfaceProperties);
             allPropertiesToCheckForIgnore.Add(property);
 
             foreach (var propertyToCheckForIgnore in allPropertiesToCheckForIgnore)
             {
-                if (!propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.Name == Program.TypeScriptTypeAttributeName))
+                var attributes = TypeUtils.GetCustomAttributesData(propertyToCheckForIgnore);
+                if (attributes.All(a => a.AttributeType.Name != Constants.TypeScriptTypeAttributeName))
                 {
-                    if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "Newtonsoft.Json.JsonIgnoreAttribute"))
+                    if (attributes.Any(a => a.AttributeType.FullName == "Newtonsoft.Json.JsonIgnoreAttribute"))
                         return null;
 
-                    if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == config.CustomTypeScriptIgnoreAttributeFullName))
+                    if (attributes.Any(a => a.AttributeType.FullName == config.CustomTypeScriptIgnoreAttributeFullName))
                         return null;
 
-                    if (propertyToCheckForIgnore.GetAttributes().Any(a => a.AttributeClass?.Name == Program.TypeScriptIgnoreAttributeName))
+                    if (attributes.Any(a => a.AttributeType.Name == Constants.TypeScriptIgnoreAttributeName))
                         return null;
                 }
             }
@@ -84,14 +75,14 @@ namespace TSTypeGen
                 name = StringUtils.ToCamelCase(property.Name);
             }
 
-            var isOptional = property.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == Program.TypeScriptOptionalAttributeName) != null;
+            var isOptional = TypeUtils.GetCustomAttributesData(property).FirstOrDefault(a => a.AttributeType.Name == Constants.TypeScriptOptionalAttributeName) != null;
 
             return new TsInterfaceMember(name, BuildTsTypeReferenceToPropertyType(property, config, currentTsNamespace), isOptional);
         }
 
-        private static TsTypeReference BuildTsTypeReferenceToPropertyType(IPropertySymbol property, TypeBuilderConfig config, string currentTsNamespace)
+        private static TsTypeReference BuildTsTypeReferenceToPropertyType(PropertyInfo property, TypeBuilderConfig config, string currentTsNamespace)
         {
-            ITypeSymbol type = property.Type;
+            var type = property.PropertyType;
             var typeScriptTypeAttribute = GetTypeScriptTypeAttribute(property);
             if (typeScriptTypeAttribute != null)
             {
@@ -99,7 +90,7 @@ namespace TSTypeGen
                 {
                     return TsTypeReference.Simple(typeString);
                 }
-                else if (typeScriptTypeAttribute.ConstructorArguments[0].Value is ITypeSymbol replaceWithType)
+                else if (typeScriptTypeAttribute.ConstructorArguments[0].Value is Type replaceWithType)
                 {
                     type = replaceWithType;
                 }
@@ -108,127 +99,95 @@ namespace TSTypeGen
             return BuildTsTypeReference(type, config, currentTsNamespace, false);
         }
 
-        private static AttributeData GetTypeScriptTypeAttribute(IPropertySymbol property)
+        private static CustomAttributeData GetTypeScriptTypeAttribute(PropertyInfo property)
         {
-            var attributes = property.GetAttributes();
+            return GetTypeScriptTypeAttribute(TypeUtils.GetCustomAttributesData(property));
+        }
 
-            var explicitTypeAttribute = attributes.FirstOrDefault(a => a.AttributeClass?.Name == Program.TypeScriptTypeAttributeName && a.ConstructorArguments.Length == 1);
+        private static CustomAttributeData GetTypeScriptTypeAttribute(Type type)
+        {
+            return GetTypeScriptTypeAttribute(TypeUtils.GetCustomAttributesData(type));
+        }
+
+        private static CustomAttributeData GetTypeScriptTypeAttribute(List<CustomAttributeData> attributes)
+        {
+            var explicitTypeAttribute = attributes.FirstOrDefault(a => a.AttributeType?.Name == Constants.TypeScriptTypeAttributeName && a.ConstructorArguments.Count == 1);
             if (explicitTypeAttribute != null)
                 return explicitTypeAttribute;
 
             foreach (var attribute in attributes)
             {
-                if (attribute.AttributeClass != null)
-                {
-                    var attributeAttributes = attribute.AttributeClass.GetAttributes();
+                var attributeAttributes = TypeUtils.GetCustomAttributesData(attribute.AttributeType);
 
-                    var attributeAttribute = attributeAttributes.FirstOrDefault(a => a.AttributeClass?.Name == Program.TypeScriptTypeAttributeName && a.ConstructorArguments.Length == 1);
-                    if (attributeAttribute != null)
-                        return attributeAttribute;
-                }
+                var attributeAttribute = attributeAttributes.FirstOrDefault(a => a.AttributeType?.Name == Constants.TypeScriptTypeAttributeName && a.ConstructorArguments.Count == 1);
+                if (attributeAttribute != null)
+                    return attributeAttribute;
             }
 
             return null;
         }
 
-        private static TsTypeReference BuildTsTypeReference(ITypeSymbol type, TypeBuilderConfig config, string currentTsNamespace, bool returnTheMainTypeEvenIfItHasADerivedTypesUnion)
+        private static TsTypeReference BuildTsTypeReference(Type type, TypeBuilderConfig config, string currentTsNamespace, bool returnTheMainTypeEvenIfItHasADerivedTypesUnion)
         {
             var isOptional = false;
-            if (IsNullableType(type))
+
+            var underlyingNullableType = GetUnderlyingNullableType(type);
+            if (underlyingNullableType != null)
             {
-                type = ((INamedTypeSymbol)type).TypeArguments[0];
+                type = underlyingNullableType;
                 isOptional = true;
             }
 
-            if (type.TypeKind == TypeKind.TypeParameter)
+            if (type.IsGenericParameter)
             {
                 return TsTypeReference.Simple(type.Name, isOptional);
             }
 
-            var typeScriptTypeAttribute = type.GetAttributes().FirstOrDefault(a => a.AttributeClass.Name == Program.TypeScriptTypeAttributeName && a.ConstructorArguments.Length == 1);
+            var typeFullName = TypeUtils.GetFullName(type);
+
+            if (typeFullName != null && config.TypeMappings.TryGetValue(typeFullName, out var mappedType))
+            {
+                return mappedType;
+            }
+
+            var typeScriptTypeAttribute = GetTypeScriptTypeAttribute(type);
             if (typeScriptTypeAttribute != null)
             {
                 if (typeScriptTypeAttribute.ConstructorArguments[0].Value is string typeString)
                 {
                     return TsTypeReference.Simple(typeString);
                 }
-                else if (typeScriptTypeAttribute.ConstructorArguments[0].Value is ITypeSymbol replaceWithType)
+                else if (typeScriptTypeAttribute.ConstructorArguments[0].Value is Type replaceWithType)
                 {
                     type = replaceWithType;
                 }
             }
 
-            var typeName = type.ToDisplayString();
-            if (type is INamedTypeSymbol nt)
-            {
-                if (!config.TypeMappings.TryGetValue(typeName, out var result))
-                {
-                    var namespaceName = Processor.GetTypescriptNamespace(type);
-                    var derivedTypesUnionName = returnTheMainTypeEvenIfItHasADerivedTypesUnion ? null : GetDerivedTypesUnionName(nt);
-
-                    if (namespaceName != null)
-                    {
-                        if (namespaceName == currentTsNamespace)
-                        {
-                            result = TsTypeReference.Simple(derivedTypesUnionName ?? type.Name);
-                        }
-                        else
-                        {
-                            result = TsTypeReference.Simple(namespaceName + "." + (derivedTypesUnionName ?? type.Name));
-                        }
-                    }
-                    else
-                    {
-                        if (type.DeclaringSyntaxReferences.Length > 0)
-                        {
-                            string path = Processor.GetTypeFilePath(nt);
-                            result = derivedTypesUnionName != null ? TsTypeReference.NameImportedType(derivedTypesUnionName, path, isOptional) : TsTypeReference.DefaultImportedType(type.Name, path, isOptional);
-                        }
-                    }
-                }
-                else
-                {
-                    return result;
-                }
-
-                if (result != null)
-                {
-                    if (nt.Arity > 0)
-                    {
-                        var typeArgs = nt.TypeArguments.Select(t => BuildTsTypeReference(t, config, currentTsNamespace, false));
-                        result = TsTypeReference.Generic(result, typeArgs);
-                    }
-                    return result;
-                }
-            }
-
-            if (type.SpecialType >= SpecialType.System_SByte && type.SpecialType <= SpecialType.System_Double)
+            if (
+                TypeUtils.Is<byte>(type) ||
+                TypeUtils.Is<sbyte>(type) ||
+                TypeUtils.Is<int>(type) ||
+                TypeUtils.Is<uint>(type) ||
+                TypeUtils.Is<long>(type) ||
+                TypeUtils.Is<ulong>(type) ||
+                TypeUtils.Is<short>(type) ||
+                TypeUtils.Is<ushort>(type) ||
+                TypeUtils.Is<double>(type) ||
+                TypeUtils.Is<decimal>(type) ||
+                TypeUtils.Is<float>(type)
+            )
             {
                 return TsTypeReference.Simple("number", isOptional);
             }
 
-            if (type.SpecialType == SpecialType.System_String)
+            if (TypeUtils.Is<string>(type))
             {
                 return TsTypeReference.Simple("string", isOptional);
             }
 
-            if (type.SpecialType == SpecialType.System_Boolean)
+            if (TypeUtils.Is<bool>(type))
             {
                 return TsTypeReference.Simple("boolean", isOptional);
-            }
-
-            if (type.ContainingNamespace?.ToDisplayString() == "Newtonsoft.Json.Linq")
-            {
-                switch (type.Name)
-                {
-                    case "JToken":
-                    case "JValue":
-                        return TsTypeReference.Simple("any", isOptional);
-                    case "JArray":
-                        return TsTypeReference.Array(TsTypeReference.Simple("any", isOptional));
-                    case "JObject":
-                        return TsTypeReference.Dictionary(TsTypeReference.Simple("string", isOptional), TsTypeReference.Simple("any", isOptional));
-                }
             }
 
             var dictionaryTypes = GetDictionaryUnderlyingTypes(type);
@@ -243,78 +202,99 @@ namespace TSTypeGen
                 return TsTypeReference.Array(BuildTsTypeReference(enumerableUnderlyingType, config, currentTsNamespace, false));
             }
 
-            return TsTypeReference.Simple("any");
+            if (typeFullName != null && (type.IsClass || type.IsInterface || type.IsValueType))
+            {
+                var namespaceName = GetTypescriptNamespace(type);
+                if (!string.IsNullOrEmpty(namespaceName))
+                {
+                    var derivedTypesUnionName = returnTheMainTypeEvenIfItHasADerivedTypesUnion ? null : GetDerivedTypesUnionName(type);
+
+                    var typeName = TypeUtils.GetNameWithoutGenericArity(type);
+
+                    var result = default(TsTypeReference);
+                    if (namespaceName == currentTsNamespace)
+                    {
+                        result = TsTypeReference.Simple(derivedTypesUnionName ?? typeName);
+                    }
+                    else
+                    {
+                        result = TsTypeReference.Simple(namespaceName + "." + (derivedTypesUnionName ?? typeName));
+                    }
+
+                    if (result != null)
+                    {
+                        if (type.GenericTypeArguments.Length > 0)
+                        {
+                            var typeArgs = type.GenericTypeArguments.Select(t => BuildTsTypeReference(t, config, currentTsNamespace, false));
+                            result = TsTypeReference.Generic(result, typeArgs);
+                        }
+
+                        return result;
+                    }
+                }
+            }
+
+            return TsTypeReference.Simple("unknown");
         }
 
-        private static ITypeSymbol GetEnumerableUnderlyingType(ITypeSymbol type)
+        private static Type GetUnderlyingNullableType(Type type)
         {
-            var enumerable = type.AllInterfaces.FirstOrDefault(i => i.IsGenericType && i.ConstructedFrom.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T);
-            if (enumerable != null)
-                return enumerable.TypeArguments.FirstOrDefault();
-
-            var nt = type as INamedTypeSymbol;
-            if (nt?.ConstructedFrom?.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T)
+            if (type.FullName?.StartsWith("System.Nullable`") == true)
             {
-                return nt.TypeArguments.FirstOrDefault();
+                return type.GenericTypeArguments.First();
             }
 
             return null;
         }
 
-        private static bool IsDictionaryInterface(INamedTypeSymbol type)
+        private static Type GetEnumerableUnderlyingType(Type type)
         {
-            return type.IsGenericType
-                && type.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                && (type.Name == "IDictionary" || type.Name == "IReadOnlyDictionary");
+            var types = type.GetInterfaces().ToList();
+            types.Add(type);
+            var enumerable = types.FirstOrDefault(i => i.IsGenericType && TypeUtils.Equals(typeof(IEnumerable<>), i.GetGenericTypeDefinition()));
+            if (enumerable != null)
+                return enumerable.GenericTypeArguments.FirstOrDefault();
+
+            return null;
         }
 
-        private static Tuple<ITypeSymbol, ITypeSymbol> GetDictionaryUnderlyingTypes(ITypeSymbol type)
+        private static bool IsDictionaryInterface(Type type)
         {
-            var nt = type as INamedTypeSymbol;
-            if (nt != null && IsDictionaryInterface(nt))
+            return type.IsGenericType && (TypeUtils.Equals(type.GetGenericTypeDefinition(), typeof(IDictionary<,>)) || TypeUtils.Equals(type.GetGenericTypeDefinition(), typeof(IReadOnlyDictionary<,>)));
+        }
+
+        private static Tuple<Type, Type> GetDictionaryUnderlyingTypes(Type type)
+        {
+            if (IsDictionaryInterface(type))
             {
-                return Tuple.Create(((INamedTypeSymbol)type).TypeArguments[0], ((INamedTypeSymbol)type).TypeArguments[1]);
+                return Tuple.Create(type.GenericTypeArguments[0], type.GenericTypeArguments[1]);
             }
 
-            var iface = type.AllInterfaces.FirstOrDefault(IsDictionaryInterface);
+            var iface = type.GetInterfaces().FirstOrDefault(IsDictionaryInterface);
             if (iface != null)
             {
-                return Tuple.Create(iface.TypeArguments[0], iface.TypeArguments[1]);
+                return Tuple.Create(iface.GenericTypeArguments[0], iface.GenericTypeArguments[1]);
             }
 
             return null;
         }
 
-        private static TsInterfaceMember WrapProperty(TsInterfaceMember member, TypeBuilderConfig config)
+        private static string GetDerivedTypesUnionName(Type type)
         {
-            return new TsInterfaceMember(member.Name, TsTypeReference.Generic(config.PropertyTypeReference, new[] { member.Type }), member.IsOptional);
-        }
-
-        private static IEnumerable<TsTypeReference> GetMustBeAssignableFromList(INamedTypeSymbol type, TypeBuilderConfig config, string currentTsNamespace)
-        {
-            var structuralSubsetOfInterfaceNamespace = !string.IsNullOrEmpty(config.StructuralSubsetOfInterfaceFullName) ? config.StructuralSubsetOfInterfaceFullName.Substring(0, config.StructuralSubsetOfInterfaceFullName.LastIndexOf('.')) : "";
-            var structuralSubsetOfInterfaceName = config.StructuralSubsetOfInterfaceFullName?.Split('.').LastOrDefault();
-
-            return type.AllInterfaces.Where(i => i.Name == structuralSubsetOfInterfaceName && i.ContainingNamespace.ToDisplayString() == structuralSubsetOfInterfaceNamespace && i.TypeArguments.Length == 1)
-                                     .Select(i => BuildTsTypeReference(i.TypeArguments[0], config, currentTsNamespace, true));
-        }
-
-        private static string GetDerivedTypesUnionName(INamedTypeSymbol type)
-        {
-            var attr = type.GetAttributes().FirstOrDefault(a => a.AttributeClass.Name == Program.GenerateTypeScriptDerivedTypesUnionAttributeName);
+            var attr = TypeUtils.GetCustomAttributesData(type).FirstOrDefault(a => a.AttributeType.Name == Constants.GenerateTypeScriptDerivedTypesUnionAttributeName);
             if (attr == null)
                 return null;
 
-            return attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string unionName ? unionName : (type.Name + "Types");
+            return attr.ConstructorArguments.Count > 0 && attr.ConstructorArguments[0].Value is string unionName ? unionName : (TypeUtils.GetNameWithoutGenericArity(type) + "Types");
         }
 
-        private static async Task<DerivedTypesUnionGeneration> GetDerivedTypesAsync(INamedTypeSymbol type, TypeBuilderConfig config, string currentTsNamespace, Solution solution)
+        private static DerivedTypesUnionGeneration GetDerivedTypes(Type type, TypeBuilderConfig config, string currentTsNamespace, GeneratorContext generatorContext)
         {
             var derivedTypesUnionName = GetDerivedTypesUnionName(type);
             if (derivedTypesUnionName == null)
                 return null;
 
-            var derivedClasses = await SymbolFinder.FindDerivedClassesAsync(type, solution);
+            var derivedClasses = generatorContext.FindDerivedTypes(type);
 
             var derivedTypes = derivedClasses
                 .Where(t => !t.IsAbstract)
@@ -323,7 +303,7 @@ namespace TSTypeGen
             return new DerivedTypesUnionGeneration(ImmutableArray.CreateRange(derivedTypes.Select(i => BuildTsTypeReference(i, config, currentTsNamespace, true))), derivedTypesUnionName);
         }
 
-        private static string GetTypeMemberName(INamedTypeSymbol type)
+        private static string GetTypeMemberName(Type type)
         {
             // No reason to create a type member on an abstract type since the purpose of the type member
             // is to identify a concrete type
@@ -334,7 +314,7 @@ namespace TSTypeGen
             var currentType = type;
             while (currentType != null)
             {
-                var attr = currentType.GetAttributes().FirstOrDefault(a => a.AttributeClass.Name == Program.GenerateTypeScriptTypeMemberAttributeName);
+                var attr = TypeUtils.GetCustomAttributesData(currentType).FirstOrDefault(a => a.AttributeType.Name == Constants.GenerateTypeScriptTypeMemberAttributeName);
                 if (attr != null)
                 {
                     if (attr.ConstructorArguments[0].Value is string name)
@@ -343,7 +323,7 @@ namespace TSTypeGen
                     }
                     else
                     {
-                        typeMemberName = Program.DefaultTypeMemberName;
+                        typeMemberName = Constants.DefaultTypeMemberName;
                     }
                     break;
                 }
@@ -354,14 +334,14 @@ namespace TSTypeGen
             return typeMemberName;
         }
 
-        internal static INamedTypeSymbol GetParentTypeToAugument(INamedTypeSymbol type)
+        internal static Type GetParentTypeToAugument(Type type)
         {
-            var attr = type.GetAttributes().FirstOrDefault(a => a.AttributeClass.Name == Program.TypeScriptAugumentParentAttributeName);
+            var attr = TypeUtils.GetCustomAttributesData(type).FirstOrDefault(a => a.AttributeType.Name == Constants.TypeScriptAugumentParentAttributeName);
 
             if (attr != null)
             {
-                var baseTypes = type.Interfaces.ToList();
-                if (type.BaseType != null && type.BaseType.SpecialType != SpecialType.System_Object)
+                var baseTypes = type.GetInterfaces().ToList();
+                if (type.BaseType != null && !TypeUtils.Is<object>(type.BaseType))
                     baseTypes.Insert(0, type.BaseType);
 
                 return baseTypes.FirstOrDefault();
@@ -370,65 +350,126 @@ namespace TSTypeGen
             return null;
         }
 
-        public static async Task<TsTypeDefinition> BuildTsTypeDefinitionAsync(INamedTypeSymbol type, TypeBuilderConfig config, Solution solution)
+        internal static string GetTypescriptNamespace(Type type)
         {
-            var tsNamespace = Processor.GetTypescriptNamespace(type);
+            var parentToAugument = TypeBuilder.GetParentTypeToAugument(type);
+            if (parentToAugument != null)
+                type = parentToAugument;
 
-            if (type.TypeKind == TypeKind.Enum)
+            string DoGetTypescriptNamespace(object typeOrAssembly)
             {
-                var useConstEnum = type.GetAttributes().Any(a =>
-                    a.AttributeClass.Name == Program.GenerateTypeScriptTypeConstEnumAttributeName);
+                var customAttributes = typeOrAssembly is Type type ? TypeUtils.GetCustomAttributesData(type) : TypeUtils.GetAssemblyCustomAttributesData((Assembly)typeOrAssembly);
 
-                var members = type.GetMembers().OfType<IFieldSymbol>().Where(f => f.IsConst).Select(f => f.Name);
-                return TsTypeDefinition.Enum(type.Name, members, useConstEnum);
+                var attr = customAttributes.FirstOrDefault(a => a.AttributeType.Name == Constants.GenerateTypeScriptNamespaceAttributeName && a.ConstructorArguments.Count == 1 && a.ConstructorArguments[0].Value is string);
+                return (string)attr?.ConstructorArguments[0].Value;
+            }
+
+            for (var currentType = type; currentType != null; currentType = currentType.DeclaringType)
+            {
+                var ns = DoGetTypescriptNamespace(currentType);
+                if (ns != null)
+                {
+                    return ns;
+                }
+            }
+
+            return DoGetTypescriptNamespace(type.Assembly);
+        }
+
+        internal static bool ShouldGenerateDotNetTypeNamesAsJsDocComment(Type type)
+        {
+            bool DoShouldGenerateDotNetTypeNamesAsJsDocComment(object typeOrAssembly)
+            {
+                var customAttributes = typeOrAssembly is Type type ? TypeUtils.GetCustomAttributesData(type) : TypeUtils.GetAssemblyCustomAttributesData((Assembly) typeOrAssembly);
+                var attr = customAttributes.FirstOrDefault(a => a.AttributeType.Name == Constants.GenerateDotNetTypeNamesAsJsDocCommentAttributeName);
+                return attr != null;
+            }
+
+            if (DoShouldGenerateDotNetTypeNamesAsJsDocComment(type.Assembly))
+                return true;
+
+            for (var currentType = type; currentType != null; currentType = currentType.DeclaringType)
+            {
+                var shouldGenerate = DoShouldGenerateDotNetTypeNamesAsJsDocComment(currentType);
+                if (shouldGenerate)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        internal static Type GetCanonicalDotNetType(Type type)
+        {
+            var baseTypes = type.GetInterfaces().ToList();
+            if (type.BaseType != null)
+                baseTypes.Add(type.BaseType);
+
+            foreach (var baseType in baseTypes)
+            {
+                var attr = TypeUtils.GetCustomAttributesData(baseType).FirstOrDefault(a => a.AttributeType.Name == Constants.GenerateCanonicalDotNetTypeScriptTypeAttributeAttributeName);
+
+                if (attr != null)
+                    return baseType;
+
+                var parentCanonical = GetCanonicalDotNetType(baseType);
+                if (parentCanonical != null)
+                    return parentCanonical;
+            }
+
+            return null;
+        }
+
+        public static async Task<TsTypeDefinition> BuildTsTypeDefinitionAsync(Type type, TypeBuilderConfig config, GeneratorContext generatorContext)
+        {
+            var tsNamespace = GetTypescriptNamespace(type);
+
+            if (type.IsEnum)
+            {
+                var members = Enum.GetNames(type);
+                return TsTypeDefinition.Enum(type.Name, members);
             }
             else
             {
-                var properties = type.GetMembers()
-                                 .OfType<IPropertySymbol>()
-                                 .Where(p => p.DeclaredAccessibility == Accessibility.Public && !p.IsOverride && p.Parameters.Length == 0 && !p.IsStatic);
+                var properties = TypeUtils.GetRelevantProperties(type);
 
-                IList<ITypeSymbol> extends;
-                if (type.TypeKind == TypeKind.Interface)
+                IList<Type> extends;
+                if (type.IsInterface)
                 {
-                    extends = type.Interfaces.Cast<ITypeSymbol>().ToList();
+                    extends = type.GetInterfaces();
                 }
-                else if (type.TypeKind == TypeKind.Struct || type.BaseType.SpecialType == SpecialType.System_Object)
+                else if (type.IsValueType || TypeUtils.Is<object>(type.BaseType))
                 {
-                    extends = new List<ITypeSymbol>();
+                    extends = new List<Type>();
                 }
                 else
                 {
-                    extends = new List<ITypeSymbol>() { type.BaseType };
+                    extends = new List<Type> { type.BaseType };
                 }
 
-                foreach (var iface in type.Interfaces)
+                foreach (var iface in type.GetInterfaces())
                 {
                     // We look for default interface properties because we don't generate an extends clause for C# interfaces
                     // but that means we loose default interface properties. If any of the types interface has default properties
                     // we include it in the extends clause.
-                    var defaultInterfaceProperties = iface.GetMembers()
-                        .OfType<IPropertySymbol>()
-                        .Where(p => p.DeclaredAccessibility == Accessibility.Public && !p.IsOverride && p.Parameters.Length == 0 && !p.IsStatic && !p.IsAbstract);
+                    var defaultInterfaceProperties = TypeUtils.GetRelevantProperties(iface).Where(p => p.GetGetMethod()?.IsAbstract == false);
 
-                    if (defaultInterfaceProperties.Any() && !extends.Contains(iface))
-                        extends.Add(iface);
+                    properties.AddRange(defaultInterfaceProperties);
                 }
 
                 var parentToAugument = GetParentTypeToAugument(type);
                 var parentDefToAugument = default(TsTypeDefinition);
                 if (parentToAugument != null)
                 {
-                    parentDefToAugument = await BuildTsTypeDefinitionAsync(parentToAugument, config, solution);
+                    parentDefToAugument = await BuildTsTypeDefinitionAsync(parentToAugument, config, generatorContext);
                 }
 
-                bool wrapMembers = type.AllInterfaces.Any(i => { var s = i.ToDisplayString(); return config.TypesToWrapPropertiesFor.Contains(s); });
                 return TsTypeDefinition.Interface(type,
-                                                  properties.Select(p => BuildMember(p, type.Interfaces, config, tsNamespace)).Where(x => x != null).Select(p => wrapMembers ? WrapProperty(p, config) : p),
+                                                  properties.Select(p => BuildMember(p, type.GetInterfaces(), config, tsNamespace)).Where(x => x != null),
                                                   extends.Select(e => BuildTsTypeReference(e, config, tsNamespace, true)),
-                                                  type.TypeParameters.Select(tp => tp.Name),
-                                                  GetMustBeAssignableFromList(type, config, tsNamespace),
-                                                  await GetDerivedTypesAsync(type, config, tsNamespace, solution),
+                                                  type.GetTypeInfo().GenericTypeParameters.Select(TypeUtils.GetNameWithoutGenericArity),
+                                                  GetDerivedTypes(type, config, tsNamespace, generatorContext),
                                                   parentDefToAugument,
                                                   GetTypeMemberName(type));
             }
