@@ -157,7 +157,7 @@ namespace TSTypeGen
 
         private string GetGeneratedNamespaceFilePath(string namespaceName)
         {
-            return Path.Combine(_config.BasePath, namespaceName + ".d.ts");
+            return Path.Combine(_config.OutputPath, namespaceName + ".d.ts");
         }
 
         private List<GeneratedNamespaceFile> GetFilesToGenerate()

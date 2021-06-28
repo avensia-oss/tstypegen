@@ -24,6 +24,7 @@ namespace TSTypeGen.Tests
             var config = new Config
             {
                 BasePath = assemblyLocation,
+                OutputPath = assemblyLocation,
                 DllPatterns = new List<string> {"TSTypeGen.Tests.Main.dll", "TSTypeGen.Tests.Shared.dll"},
                 CustomTypeScriptIgnoreAttributeFullName = "TSTypeGen.Tests.Shared.CustomTypeScriptIgnoreAttribute"
             };

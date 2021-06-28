@@ -28,6 +28,11 @@ namespace TSTypeGen
                 result.OutputPath = result.BasePath;
             }
 
+            if (!Path.IsPathRooted(result.OutputPath))
+            {
+                result.OutputPath = Path.Join(result.BasePath, result.OutputPath);
+            }
+
             if (string.IsNullOrEmpty(result.NewLine))
             {
                 result.NewLine = Environment.NewLine;
