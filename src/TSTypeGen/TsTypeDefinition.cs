@@ -13,7 +13,7 @@ namespace TSTypeGen
     public abstract class TsTypeDefinition
     {
         public string Name { get; }
-        public abstract string GetSource(string outputFilePath, GetSourceConfig config, bool isNamespaceFile, Dictionary<ImportedType, string> importMappings);
+        public abstract string GetSource(string outputFilePath, Config config);
 
         private TsTypeDefinition(string name)
         {
@@ -21,22 +21,21 @@ namespace TSTypeGen
         }
 
         public static TsTypeDefinition Interface(
-            INamedTypeSymbol type,
+            Type type,
             IEnumerable<TsInterfaceMember> members,
             IEnumerable<TsTypeReference> extends,
             IEnumerable<string> typeParameters,
-            IEnumerable<TsTypeReference> mustBeAssignableFrom,
             DerivedTypesUnionGeneration derivedTypesUnionGeneration,
             TsTypeDefinition parentToAugument,
             string typeMemberName
         )
         {
-            return new InterfaceType(type, members, extends, typeParameters, mustBeAssignableFrom, derivedTypesUnionGeneration, parentToAugument, typeMemberName);
+            return new InterfaceType(type, members, extends, typeParameters, derivedTypesUnionGeneration, parentToAugument, typeMemberName);
         }
 
-        public static TsTypeDefinition Enum(string name, IEnumerable<string> members, bool useConstEnum)
+        public static TsTypeDefinition Enum(string name, IEnumerable<string> members)
         {
-            return new EnumType(name, members, useConstEnum);
+            return new EnumType(name, members);
         }
 
         private class InterfaceType : TsTypeDefinition
@@ -44,101 +43,53 @@ namespace TSTypeGen
             private readonly ImmutableArray<TsInterfaceMember> _members;
             private readonly ImmutableArray<string> _typeParameters;
             private readonly ImmutableArray<TsTypeReference> _extends;
-            private readonly ImmutableArray<TsTypeReference> _mustBeAssignableFrom;
-            private readonly INamedTypeSymbol _type;
+            private readonly Type _type;
             private readonly DerivedTypesUnionGeneration _derivedTypesUnionGeneration;
             private readonly TsTypeDefinition _parentToAugument;
             private readonly string _typeMemberName;
 
             public InterfaceType(
-                INamedTypeSymbol type,
+                Type type,
                 IEnumerable<TsInterfaceMember> members,
                 IEnumerable<TsTypeReference> extends,
                 IEnumerable<string> typeParameters,
-                IEnumerable<TsTypeReference> mustBeAssignableFrom,
                 DerivedTypesUnionGeneration derivedTypesUnionGeneration,
                 TsTypeDefinition parentToAugument,
                 string typeMemberName
-            ) : base(type.Name)
+            ) : base(TypeUtils.GetNameWithoutGenericArity(type))
             {
                 _members = ImmutableArray.CreateRange(members);
                 _extends = ImmutableArray.CreateRange(extends);
                 _typeParameters = ImmutableArray.CreateRange(typeParameters);
-                _mustBeAssignableFrom = ImmutableArray.CreateRange(mustBeAssignableFrom);
                 _type = type;
                 _derivedTypesUnionGeneration = derivedTypesUnionGeneration;
                 _parentToAugument = parentToAugument;
                 _typeMemberName = typeMemberName;
             }
 
-            private void EnsureImports(Dictionary<ImportedType, string> importMappings)
+            public override string GetSource(string outputFilePath, Config config)
             {
-                var rawImports = _members.SelectMany(m => m.Type.GetImportStatements());
-                if (_extends != null)
-                    rawImports = rawImports.Concat(_extends.SelectMany(e => e.GetImportStatements()));
-                rawImports = rawImports.Concat(_mustBeAssignableFrom.SelectMany(t => t.GetImportStatements()));
-                if (_derivedTypesUnionGeneration != null)
-                {
-                    rawImports = rawImports.Concat(_derivedTypesUnionGeneration.DerivedTypeReferences.SelectMany(t => t.GetImportStatements()));
-                }
-
-                foreach (var rawImport in rawImports.GroupBy(x => x.SourceFile).Select(g => g.First())
-                    .OrderBy(x => x.NamedImportName, StringComparer.InvariantCulture)
-                    .ThenBy(x => x.DefaultVariableName, StringComparer.InvariantCultureIgnoreCase)
-                    .ThenBy(x => x.SourceFile, StringComparer.InvariantCultureIgnoreCase))
-                {
-                    var key = new ImportedType(rawImport.SourceFile, rawImport.NamedImportName);
-                    if (importMappings.ContainsKey(key))
-                    {
-                        continue;
-                    }
-
-                    if (!importMappings.ContainsValue(rawImport.DefaultVariableName))
-                    {
-                        importMappings.Add(key, rawImport.DefaultVariableName);
-                    }
-                    else
-                    {
-                        string name;
-                        for (int i = 1;; i++)
-                        {
-                            name = rawImport.DefaultVariableName + i.ToString(CultureInfo.InvariantCulture);
-                            if (!importMappings.ContainsValue(name))
-                            {
-                                break;
-                            }
-                        }
-
-                        importMappings.Add(key, name);
-                    }
-                }
-            }
-
-            public override string GetSource(string outputFilePath, GetSourceConfig config, bool isNamespaceFile, Dictionary<ImportedType, string> importMappings)
-            {
-                var indent = isNamespaceFile ? "  " : "";
+                var indent = "  ";
 
                 var result = new StringBuilder();
-
-                EnsureImports(importMappings);
 
                 var name = Name;
                 if (_parentToAugument != null)
                     name = _parentToAugument.Name;
 
-                if (Processor.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
+                if (TypeBuilder.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
                 {
-                    var dotNetTypeAttr = _type.GetAttributes().FirstOrDefault(a =>
-                        a.AttributeClass?.Name == Program.GenerateTypeScriptDotNetNameAttributeName &&
-                        a.ConstructorArguments.Length == 1
+                    var dotNetTypeAttr = TypeUtils.GetCustomAttributesData(_type).FirstOrDefault(a =>
+                        a.AttributeType.Name == Constants.GenerateTypeScriptDotNetNameAttributeName &&
+                        a.ConstructorArguments.Count == 1
                     );
 
                     var type = _type;
-                    if (dotNetTypeAttr?.ConstructorArguments[0].Value is INamedTypeSymbol nt)
-                        type = nt;
+                    if (dotNetTypeAttr?.ConstructorArguments[0].Value is Type t)
+                        type = t;
 
-                    var canonicalType = Processor.GetCanonicalDotNetType(type);
-                    var dotNetTypeComment = $"@DotNetTypeName {GetFullNamespaceName(type)}.{type.Name},{type.ContainingAssembly.Name}";
+                    var canonicalType = TypeBuilder.GetCanonicalDotNetType(type);
+                    var dotNetTypeComment = $"@DotNetTypeName {TypeUtils.GetFullName(type)},{type.Assembly.GetName().Name}";
 
                     result.Append($"{indent}/**");
 
@@ -147,7 +98,7 @@ namespace TSTypeGen
                         result.Append(config.NewLine);
                         result.Append($"{indent} * {dotNetTypeComment}");
                         result.Append(config.NewLine);
-                        result.Append($"{indent} * @DotNetCanonicalTypeName {GetFullNamespaceName(canonicalType)}.{canonicalType.Name},{canonicalType.ContainingAssembly.Name}");
+                        result.Append($"{indent} * @DotNetCanonicalTypeName {TypeUtils.GetFullName(canonicalType)},{canonicalType.Assembly.GetName().Name}");
                         result.Append(config.NewLine);
                         result.Append($"{indent} */");
                     }
@@ -173,10 +124,10 @@ namespace TSTypeGen
 
                     if (extends.Any())
                     {
-                        result.Append(" extends ").Append(extends[0].GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings));
+                        result.Append(" extends ").Append(extends[0].GetSource());
                         for (int i = 1; i < extends.Count; i++)
                         {
-                            result.Append(", ").Append(extends[i].GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings));
+                            result.Append(", ").Append(extends[i].GetSource());
                         }
                     }
                 }
@@ -196,12 +147,10 @@ namespace TSTypeGen
                     var optional = "";
                     if (m.IsOptional || m.Type.IsOptional)
                     {
-                        if (m.IsOptional)
+                        if (m.IsOptional || m.Type.IsOptional)
                             optional = "?";
-                        else if (m.Type.IsOptional)
-                            optional = config.UseOptionalForNullables ? "?" : "";
                     }
-                    result.Append($"{indent}  {FixName(m.Name)}{optional}: {m.Type.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)};");
+                    result.Append($"{indent}  {FixName(m.Name)}{optional}: {m.Type.GetSource()};");
                     result.Append(config.NewLine);
                 }
 
@@ -211,33 +160,8 @@ namespace TSTypeGen
                 if (_derivedTypesUnionGeneration?.DerivedTypeReferences.Length > 0)
                 {
                     result.Append(config.NewLine);
-                    result.Append($"{indent}type {_derivedTypesUnionGeneration.DerivedTypesUnionName} = {string.Join(" | ", _derivedTypesUnionGeneration.DerivedTypeReferences.Select(t => t.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)))};");
+                    result.Append($"{indent}type {_derivedTypesUnionGeneration.DerivedTypesUnionName} = {string.Join(" | ", _derivedTypesUnionGeneration.DerivedTypeReferences.Select(t => t.GetSource()))};");
                     result.Append(config.NewLine);
-                }
-
-                if (!isNamespaceFile)
-                {
-                    if (_derivedTypesUnionGeneration?.DerivedTypeReferences.Length > 0)
-                    {
-                        result.Append(config.NewLine);
-                        result.Append($"export {_derivedTypesUnionGeneration.DerivedTypesUnionName};");
-                        result.Append(config.NewLine);
-                    }
-
-                    result.Append(config.NewLine);
-                    result.Append($"export default {Name};");
-                    result.Append(config.NewLine);
-
-                    foreach (var type in _mustBeAssignableFrom)
-                    {
-                        result.Append(config.NewLine)
-                              .Append($"// This type must be a structural subset of {type.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)}. A compilation error on the next line means that this is not the case.")
-                              .Append(config.NewLine)
-                              .Append("// Note, however, that the error message from TypeScript might be bad or misleading.")
-                              .Append(config.NewLine)
-                              .Append($"(function() {{ const v: {Name} = {{}} as {type.GetSource(isNamespaceFile, config.UseOptionalForNullables, importMappings)}; return v; }});")
-                              .Append(config.NewLine);
-                    }
                 }
 
                 return result.ToString();
@@ -250,71 +174,29 @@ namespace TSTypeGen
             }
         }
 
-        private string GetFullNamespaceName(INamespaceOrTypeSymbol type)
-        {
-            var namespaces = new List<string>();
-            while (!string.IsNullOrEmpty(type.ContainingNamespace?.Name))
-            {
-                namespaces.Add(type.ContainingNamespace.Name);
-                type = type.ContainingNamespace;
-            }
-
-            namespaces.Reverse();
-
-            return string.Join(".", namespaces);
-        }
-
         private class EnumType : TsTypeDefinition
         {
-            private readonly bool _useConstEnum;
             private readonly ImmutableArray<string> _members;
 
-            public EnumType(string name, IEnumerable<string> members, bool useConstEnum) : base(name)
+            public EnumType(string name, IEnumerable<string> members) : base(name)
             {
-                _useConstEnum = useConstEnum;
                 _members = ImmutableArray.CreateRange(members);
             }
 
-            public override string GetSource(string outputFilePath, GetSourceConfig config, bool isNamespaceFile, Dictionary<ImportedType, string> importMappings)
+            public override string GetSource(string outputFilePath, Config config)
             {
                 var sb = new StringBuilder();
-                var indent = isNamespaceFile ? "  " : "";
+                var indent = "  ";
 
-                if (_useConstEnum || config.UseConstEnums)
+                sb.Append($"{indent}const enum {Name} {{");
+                sb.Append(config.NewLine);
+                foreach (var member in _members)
                 {
-                    sb.Append($"{indent}const enum {Name} {{");
-                    sb.Append(config.NewLine);
-                    foreach (var member in _members)
-                    {
-                        sb.Append($"{indent}  {member} = '{StringUtils.ToCamelCase(member)}',");
-                        sb.Append(config.NewLine);
-                    }
-                    sb.Append($"{indent}}}");
+                    sb.Append($"{indent}  {member} = '{StringUtils.ToCamelCase(member)}',");
                     sb.Append(config.NewLine);
                 }
-                else
-                {
-                    sb.Append($"{indent}type ").Append(Name).Append(" = ");
-                    if (_members.Length > 0)
-                    {
-                        sb.Append("'").Append(StringUtils.ToCamelCase(_members[0])).Append("'");
-                        for (int i = 1; i < _members.Length; i++)
-                        {
-                            sb.Append(" | '").Append(StringUtils.ToCamelCase(_members[i])).Append("'");
-                        }
-                    }
-                    else
-                    {
-                        sb.Append("{}");
-                    }
-                    sb.Append(";");
-                    sb.Append(config.NewLine);
-                }
-
-                if (!isNamespaceFile)
-                {
-                    sb.Append(config.NewLine).Append("export default ").Append(Name).Append(";").Append(config.NewLine);
-                }
+                sb.Append($"{indent}}}");
+                sb.Append(config.NewLine);
 
                 return sb.ToString();
             }

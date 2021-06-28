@@ -9,53 +9,87 @@ using Microsoft.CodeAnalysis;
 
 namespace TSTypeGen
 {
-    public class GeneratedNamespaceFile : GeneratedFile
+    public class GeneratedNamespaceFile
     {
+        public string FilePath { get; }
         private readonly string _namespaceName;
-        private readonly ImmutableList<INamedTypeSymbol> _types;
+        private readonly ImmutableList<Type> _types;
 
-        public GeneratedNamespaceFile(string filePath, string namespaceName, ImmutableList<INamedTypeSymbol> types) : base(filePath)
+        public GeneratedNamespaceFile(string filePath, string namespaceName, ImmutableList<Type> types)
         {
+            FilePath = filePath;
             _namespaceName = namespaceName;
             _types = types;
         }
 
-        protected override async Task<string> GetContentAsync(TypeBuilderConfig typeBuilderConfig, GetSourceConfig getSourceConfig, Solution solution)
+        protected async Task<string> GetContentAsync(TypeBuilderConfig typeBuilderConfig, Config config, GeneratorContext generatorContext)
         {
             bool first = true;
 
-            var importMappings = new Dictionary<ImportedType, string>();
-
             var innerSource = new StringBuilder();
-            foreach (var t in _types.OrderBy(t => t.Name, StringComparer.InvariantCulture).ThenBy(t => t.ToDisplayString(), StringComparer.InvariantCulture))
+            foreach (var t in _types.OrderBy(t => t.Name, StringComparer.InvariantCulture).ThenBy(t => t.FullName, StringComparer.InvariantCulture))
             {
                 if (!first)
                 {
-                    innerSource.Append(getSourceConfig.NewLine);
+                    innerSource.Append(config.NewLine);
                 }
-                var tsTypeDefinition = await TypeBuilder.BuildTsTypeDefinitionAsync(t, typeBuilderConfig, solution);
-                innerSource.Append(tsTypeDefinition.GetSource(FilePath, getSourceConfig, true, importMappings));
+                var tsTypeDefinition = await TypeBuilder.BuildTsTypeDefinitionAsync(t, typeBuilderConfig, generatorContext);
+                innerSource.Append(tsTypeDefinition.GetSource(FilePath, config));
                 first = false;
             }
 
-            var importSource = new StringBuilder();
-            foreach (var i in importMappings)
+            return "declare namespace " + _namespaceName + " {" + config.NewLine + innerSource + "}" + config.NewLine;
+        }
+
+        public async Task ApplyAsync(TypeBuilderConfig typeBuilderConfig, Config config, GeneratorContext generatorContext)
+        {
+            bool exists = File.Exists(FilePath);
+            var origContent = exists ? ReadAllTextSafe(FilePath) : "";
+            var newContent = await GetContentAsync(typeBuilderConfig, config, generatorContext);
+
+            if (newContent != origContent)
             {
-                importSource.Append($"    type {i.Value} = import('{GetImportPath(i.Key.FilePath, getSourceConfig)}').{i.Key.ImportName ?? "default"};");
-                importSource.Append(getSourceConfig.NewLine);
+                await File.WriteAllTextAsync(FilePath, newContent);
+                Console.WriteLine($"{(exists ? "Updated" : "Created")} file {FilePath}.");
+            }
+        }
+
+        public async Task<bool> VerifyAsync(TypeBuilderConfig typeBuilderConfig, Config config, GeneratorContext generatorContext)
+        {
+            if (!File.Exists(FilePath))
+            {
+                Program.WriteError($"File {FilePath} does not exist.");
+                return false;
             }
 
-            if (importSource.Length > 0)
+            try
             {
-                return "declare namespace " + _namespaceName + " {" + getSourceConfig.NewLine +
-                       "  namespace __ImportedModules {" + getSourceConfig.NewLine +
-                       importSource +
-                       "  }" + getSourceConfig.NewLine + getSourceConfig.NewLine +
-                       innerSource.ToString() + "}" + getSourceConfig.NewLine;
+                var origContent = await File.ReadAllTextAsync(FilePath);
+                var newContent = await GetContentAsync(typeBuilderConfig, config, generatorContext);
+                if (newContent.Replace("\r\n", "\n") != origContent.Replace("\r\n" ,"\n"))
+                {
+                    Program.WriteError($"Generated file {FilePath} does not match the source definition. Run the frontend build and commit all changes to generated types.");
+                    return false;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return "declare namespace " + _namespaceName + " {" + getSourceConfig.NewLine + innerSource + "}" + getSourceConfig.NewLine;
+                Program.WriteError($"Error verifying generated file {FilePath}: {ex.Message}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public static string ReadAllTextSafe(string filePath)
+        {
+            try
+            {
+                return File.ReadAllText(filePath);
+            }
+            catch (Exception)
+            {
+                return "";
             }
         }
     }
