@@ -209,6 +209,12 @@ declare namespace Test {
     prop2: number;
   }
 
+  interface TestJsonIgnoreBaseClass {
+  }
+
+  interface TestJsonIgnoreChildClass extends TestJsonIgnoreBaseClass {
+  }
+
   interface TestJsonIgnoreClass {
     interfaceProp4: string;
     prop1: string;

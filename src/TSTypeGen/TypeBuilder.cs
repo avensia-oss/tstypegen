@@ -33,7 +33,7 @@ namespace TSTypeGen
                 return result;
             }
 
-            foreach (var interfaceProperty in property.DeclaringType?.GetInterfaces().SelectMany(i => TypeUtils.GetRelevantProperties(i).Where(p => p.Name == property.Name)) ?? new List<PropertyInfo>())
+            foreach (var interfaceProperty in property.DeclaringType?.GetInterfaces().SelectMany(i => TypeUtils.GetRelevantAndBaseProperties(i).Where(p => p.Name == property.Name)) ?? new List<PropertyInfo>())
             {
                 if (LookupSingle(interfaceProperty) is string interfaceResult)
                 {
@@ -41,16 +41,39 @@ namespace TSTypeGen
                 }
             }
 
+            var currentType = property.DeclaringType?.BaseType;
+            while (currentType != null)
+            {
+                var baseProperties = TypeUtils.GetRelevantAndBaseProperties(currentType).Where(p => p.Name == property.Name);
+                foreach (var baseProperty in baseProperties)
+                {
+                    if (LookupSingle(baseProperty) is string baseResult)
+                    {
+                        return baseResult;
+                    }
+                }
+
+                currentType = currentType.BaseType;
+            }
+
             return null;
         }
 
         private static TsInterfaceMember BuildMember(PropertyInfo property, IList<Type> interfaces, TypeBuilderConfig config, string currentTsNamespace)
         {
-            var interfaceProperties = interfaces.SelectMany(i => TypeUtils.GetRelevantProperties(i).Where(p => p.Name == property.Name));
+            var interfaceProperties = interfaces.SelectMany(i => TypeUtils.GetRelevantAndBaseProperties(i).Where(p => p.Name == property.Name));
 
             var allPropertiesToCheckForIgnore = new List<PropertyInfo>();
-            allPropertiesToCheckForIgnore.AddRange(interfaceProperties);
             allPropertiesToCheckForIgnore.Add(property);
+            allPropertiesToCheckForIgnore.AddRange(interfaceProperties);
+
+            var currentType = property.DeclaringType?.BaseType;
+            while (currentType != null)
+            {
+                var baseProperties = TypeUtils.GetRelevantAndBaseProperties(currentType).Where(p => p.Name == property.Name);
+                allPropertiesToCheckForIgnore.AddRange(baseProperties);
+                currentType = currentType.BaseType;
+            }
 
             foreach (var propertyToCheckForIgnore in allPropertiesToCheckForIgnore)
             {

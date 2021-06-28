@@ -68,6 +68,14 @@ namespace TSTypeGen
                 .ToList();
         }
 
+        public static List<PropertyInfo> GetRelevantAndBaseProperties(Type type)
+        {
+            return type
+                .GetProperties(BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public)
+                .Where(p => p.GetIndexParameters().Length == 0)
+                .ToList();
+        }
+
         public static List<CustomAttributeData> GetCustomAttributesData(Type type)
         {
             try
