@@ -143,7 +143,7 @@ namespace TSTypeGen
                 return TsTypeReference.Simple(type.Name, isOptional);
             }
 
-            var typeFullName = TypeUtils.GetFullName(type);
+            var typeFullName = TypeUtils.GetFullNameWithGenericArguments(type);
 
             if (typeFullName != null && config.TypeMappings.TryGetValue(typeFullName, out var mappedType))
             {

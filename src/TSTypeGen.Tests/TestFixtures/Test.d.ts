@@ -3,6 +3,7 @@ declare namespace Test {
     prop1: external.CustomDateTime;
     prop2: external.CustomTimeSpan;
     prop3: external.CustomGuid;
+    prop4: external.CustomByteList;
   }
 
   interface ExplicitNamespaceModuleClass {

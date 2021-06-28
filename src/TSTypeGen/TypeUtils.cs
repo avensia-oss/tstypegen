@@ -40,6 +40,26 @@ namespace TSTypeGen
             return fullName;
         }
 
+        public static string GetFullNameWithGenericArguments(Type type)
+        {
+            var fullName = type.FullName;
+            if ((fullName == null || fullName.Contains('`')) && type.Name != null && type.Namespace != null)
+                fullName = type.Namespace + "." + GetNameWithoutGenericArity(type);
+
+            var args = new List<string>();
+            foreach (var arg in type.GenericTypeArguments)
+            {
+                args.Add(GetFullNameWithGenericArguments(arg));
+            }
+
+            if (args.Any())
+            {
+                fullName += "<" + string.Join(", ", args) + ">";
+            }
+
+            return fullName;
+        }
+
         public static List<PropertyInfo> GetRelevantProperties(Type type)
         {
             return type

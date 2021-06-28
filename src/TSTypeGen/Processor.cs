@@ -196,7 +196,7 @@ namespace TSTypeGen
                     string key;
                     if (attribute.ConstructorArguments[0].Value is Type type)
                     {
-                        key = type.FullName;
+                        key = TypeUtils.GetFullNameWithGenericArguments(type);
                     }
                     else if (attribute.ConstructorArguments[0].Value is string s)
                     {
