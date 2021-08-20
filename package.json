@@ -26,7 +26,8 @@
     "typescript": "^4.1.3"
   },
   "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "tsc"
+    "build": "tsc && dotnet publish src/TSTypeGen/TSTypeGen.csproj -o ./bin",
+    "test": "dotnet test src/TSTypeGen.Tests/TSTypeGen.Tests.csproj",
+    "prepublishOnly": "npm run test && npm run build"
   }
 }
