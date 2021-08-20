@@ -22,6 +22,15 @@ namespace TSTypeGen
             {
                 result.BasePath = Path.GetDirectoryName(path);
             }
+            else
+            {
+                result.BasePath = Path.Combine(Path.GetDirectoryName(path), result.BasePath);
+            }
+
+            if (!Path.IsPathRooted(result.BasePath))
+            {
+                result.BasePath = Path.Combine(Directory.GetCurrentDirectory(), result.BasePath);
+            }
 
             if (string.IsNullOrEmpty(result.OutputPath))
             {
