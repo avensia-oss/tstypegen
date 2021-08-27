@@ -444,6 +444,30 @@ namespace TSTypeGen
             return null;
         }
 
+
+        internal static string GetWrapperTypeForMembers(Type type)
+        {
+            var baseTypes = type.GetInterfaces().ToList();
+            if (type.BaseType != null)
+                baseTypes.Add(type.BaseType);
+
+            static string GetWrapperType(Type type)
+            {
+                var attr = TypeUtils.GetCustomAttributesData(type).FirstOrDefault(a => a.AttributeType.Name == Constants.TypeScriptGenericWrapperTypeForMembersAttributeName);
+                return attr != null ? (string)attr.ConstructorArguments[0].Value : null;
+            }
+
+
+            foreach (var baseType in baseTypes)
+            {
+               var wrapperType =  GetWrapperType(baseType);
+                if (!string.IsNullOrEmpty(wrapperType))
+                    return wrapperType;
+            }
+
+            return GetWrapperType(type);
+        }
+
         public static async Task<TsTypeDefinition> BuildTsTypeDefinitionAsync(Type type, TypeBuilderConfig config, GeneratorContext generatorContext)
         {
             var tsNamespace = GetTypescriptNamespace(type);

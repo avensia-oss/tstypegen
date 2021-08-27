@@ -142,6 +142,7 @@ namespace TSTypeGen
                     result.Append(config.NewLine);
                 }
 
+                var memberTypeWrapper = TypeBuilder.GetWrapperTypeForMembers(_type);
                 foreach (var m in _members)
                 {
                     var optional = "";
@@ -150,7 +151,7 @@ namespace TSTypeGen
                         if (m.IsOptional || m.Type.IsOptional)
                             optional = "?";
                     }
-                    result.Append($"{indent}  {FixName(m.Name)}{optional}: {m.Type.GetSource()};");
+                    result.Append($"{indent}  {FixName(m.Name)}{optional}: {WrapType(m.Type.GetSource(), memberTypeWrapper)};");
                     result.Append(config.NewLine);
                 }
 
@@ -165,6 +166,11 @@ namespace TSTypeGen
                 }
 
                 return result.ToString();
+            }
+
+            private string WrapType(string name, string memberTypeWrapper)
+            {
+               return string.IsNullOrEmpty(memberTypeWrapper) ? name : $"{memberTypeWrapper}<{name}>";
             }
 
             private static readonly Regex ValidIdentifierRegex = new Regex("^[a-zA-Z_][a-zA-Z_0-9]*$");
