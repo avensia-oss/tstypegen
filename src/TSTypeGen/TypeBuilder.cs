@@ -101,7 +101,7 @@ namespace TSTypeGen
 
             var isOptional = TypeUtils.GetCustomAttributesData(member).FirstOrDefault(a => a.AttributeType.Name == Constants.TypeScriptOptionalAttributeName) != null;
 
-            return new TsInterfaceMember(name, BuildTsTypeReferenceToPropertyType(member, config, currentTsNamespace, isOptional), isOptional);
+            return new TsInterfaceMember(name, BuildTsTypeReferenceToPropertyType(member, config, currentTsNamespace, isOptional), member, isOptional);
         }
 
         private static TsTypeReference BuildTsTypeReferenceToPropertyType(MemberInfo member, TypeBuilderConfig config, string currentTsNamespace, bool isOptional)

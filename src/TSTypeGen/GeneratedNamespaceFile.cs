@@ -34,7 +34,7 @@ namespace TSTypeGen
                     innerSource.Append(config.NewLine);
                 }
                 var tsTypeDefinition = await TypeBuilder.BuildTsTypeDefinitionAsync(t, typeBuilderConfig, generatorContext);
-                innerSource.Append(tsTypeDefinition.GetSource(FilePath, config));
+                innerSource.Append(tsTypeDefinition.GetSource(FilePath, config, generatorContext));
                 first = false;
             }
 

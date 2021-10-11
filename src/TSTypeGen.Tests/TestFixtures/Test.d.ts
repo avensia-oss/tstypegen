@@ -111,6 +111,40 @@ declare namespace Test {
     prop1: number;
   }
 
+  /**
+   * This type is awesome!
+   */
+  interface TestClassWithComments {
+    /**
+     * This is the best property you've ever seen!
+     * This is a comment on a new line.
+     * 
+     * Wow, this is a comment with an empty line above it!
+     */
+    prop1: number;
+    /**
+     * 
+     * This comment
+     *   has a bit
+     *  odd whitespace
+     * 
+     * formatting. With whitespace at the end.
+     * 
+     * 
+     */
+    prop2: number;
+    /**
+     * This is a regular summary comment
+     */
+    prop3: number;
+    /**
+     * This is a typeScriptComment for a property that also has a summary comment
+     */
+    prop4: number;
+    prop5: number;
+    prop6: number;
+  }
+
   const enum TestConstEnum {
     FirstValue = 'firstValue',
     SecondValue = 'secondValue',
