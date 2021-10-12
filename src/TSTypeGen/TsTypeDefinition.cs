@@ -161,7 +161,7 @@ namespace TSTypeGen
                 if (_derivedTypesUnionGeneration?.DerivedTypeReferences.Length > 0)
                 {
                     result.Append(config.NewLine);
-                    result.Append($"{indent}type {_derivedTypesUnionGeneration.DerivedTypesUnionName} = {string.Join(" | ", _derivedTypesUnionGeneration.DerivedTypeReferences.Select(t => t.GetSource()))};");
+                    result.Append($"{indent}type {_derivedTypesUnionGeneration.DerivedTypesUnionName} ={config.NewLine}{indent}  | {string.Join($"{config.NewLine}{indent}  | ", _derivedTypesUnionGeneration.DerivedTypeReferences.Select(t => t.GetSource()))};");
                     result.Append(config.NewLine);
                 }
 

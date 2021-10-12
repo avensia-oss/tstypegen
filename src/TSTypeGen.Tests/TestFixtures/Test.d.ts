@@ -130,7 +130,9 @@ declare namespace Test {
     prop1: number;
   }
 
-  type TestDerivedTypesUnionBaseTypes = TestDerivedTypesUnionClass1 | TestDerivedTypesUnionClass3;
+  type TestDerivedTypesUnionBaseTypes =
+    | TestDerivedTypesUnionClass1
+    | TestDerivedTypesUnionClass3;
 
   interface TestDerivedTypesUnionClass1 extends TestDerivedTypesUnionBase {
     prop2: number;
@@ -140,7 +142,8 @@ declare namespace Test {
     prop2: number;
   }
 
-  type MyUnion = TestDerivedTypesUnionClass3;
+  type MyUnion =
+    | TestDerivedTypesUnionClass3;
 
   interface TestDerivedTypesUnionClass3 extends TestDerivedTypesUnionClass2 {
     prop3: number;
@@ -351,7 +354,9 @@ declare namespace Test {
     prop1: number;
   }
 
-  type TestUnionFieldsBaseTypes = TestUnionFieldsClass1 | TestUnionFieldsClass2;
+  type TestUnionFieldsBaseTypes =
+    | TestUnionFieldsClass1
+    | TestUnionFieldsClass2;
 
   interface TestUnionFieldsClass1 extends TestUnionFieldsBase {
     prop2: number;
