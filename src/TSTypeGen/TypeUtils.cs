@@ -68,6 +68,14 @@ namespace TSTypeGen
                 .ToList();
         }
 
+        public static List<FieldInfo> GetRelevantFields(Type type)
+        {
+            return type
+                .GetFields(BindingFlags.Static | BindingFlags.GetField | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                .Where(f => f.IsLiteral)
+                .ToList();
+        }
+
         public static List<PropertyInfo> GetRelevantAndBaseProperties(Type type)
         {
             return type
@@ -99,11 +107,11 @@ namespace TSTypeGen
             }
         }
 
-        public static List<CustomAttributeData> GetCustomAttributesData(PropertyInfo propertyInfo)
+        public static List<CustomAttributeData> GetCustomAttributesData(MemberInfo memberInfo)
         {
             try
             {
-                return propertyInfo.GetCustomAttributesData().Select(a =>
+                return memberInfo.GetCustomAttributesData().Select(a =>
                 {
                     try
                     {

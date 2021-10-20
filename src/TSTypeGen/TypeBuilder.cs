@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -9,11 +10,11 @@ namespace TSTypeGen
 {
     public class TypeBuilder
     {
-        private static string FindNameFromJsonPropertyAttribute(PropertyInfo property)
+        private static string FindNameFromJsonPropertyAttribute(MemberInfo member)
         {
-            string LookupSingle(PropertyInfo p)
+            string LookupSingle(MemberInfo m)
             {
-                var jsonPropertyAttribute = TypeUtils.GetCustomAttributesData(p).FirstOrDefault(a => a.AttributeType.FullName == "Newtonsoft.Json.JsonPropertyAttribute");
+                var jsonPropertyAttribute = TypeUtils.GetCustomAttributesData(m).FirstOrDefault(a => a.AttributeType.FullName == "Newtonsoft.Json.JsonPropertyAttribute");
                 if (jsonPropertyAttribute != null)
                 {
                     if (jsonPropertyAttribute.NamedArguments?.Any(x => x.MemberName == "PropertyName") == true)
@@ -28,12 +29,12 @@ namespace TSTypeGen
                 return null;
             }
 
-            if (LookupSingle(property) is string result)
+            if (LookupSingle(member) is string result)
             {
                 return result;
             }
 
-            foreach (var interfaceProperty in property.DeclaringType?.GetInterfaces().SelectMany(i => TypeUtils.GetRelevantAndBaseProperties(i).Where(p => p.Name == property.Name)) ?? new List<PropertyInfo>())
+            foreach (var interfaceProperty in member.DeclaringType?.GetInterfaces().SelectMany(i => TypeUtils.GetRelevantAndBaseProperties(i).Where(p => p.Name == member.Name)) ?? new List<PropertyInfo>())
             {
                 if (LookupSingle(interfaceProperty) is string interfaceResult)
                 {
@@ -41,10 +42,10 @@ namespace TSTypeGen
                 }
             }
 
-            var currentType = property.DeclaringType?.BaseType;
+            var currentType = member.DeclaringType?.BaseType;
             while (currentType != null)
             {
-                var baseProperties = TypeUtils.GetRelevantAndBaseProperties(currentType).Where(p => p.Name == property.Name);
+                var baseProperties = TypeUtils.GetRelevantAndBaseProperties(currentType).Where(p => p.Name == member.Name);
                 foreach (var baseProperty in baseProperties)
                 {
                     if (LookupSingle(baseProperty) is string baseResult)
@@ -59,18 +60,18 @@ namespace TSTypeGen
             return null;
         }
 
-        private static TsInterfaceMember BuildMember(PropertyInfo property, IList<Type> interfaces, TypeBuilderConfig config, string currentTsNamespace)
+        private static TsInterfaceMember BuildMember(MemberInfo member, IList<Type> interfaces, TypeBuilderConfig config, string currentTsNamespace)
         {
-            var interfaceProperties = interfaces.SelectMany(i => TypeUtils.GetRelevantAndBaseProperties(i).Where(p => p.Name == property.Name));
+            var interfaceProperties = interfaces.SelectMany(i => TypeUtils.GetRelevantAndBaseProperties(i).Where(p => p.Name == member.Name));
 
-            var allPropertiesToCheckForIgnore = new List<PropertyInfo>();
-            allPropertiesToCheckForIgnore.Add(property);
+            var allPropertiesToCheckForIgnore = new List<MemberInfo>();
+            allPropertiesToCheckForIgnore.Add(member);
             allPropertiesToCheckForIgnore.AddRange(interfaceProperties);
 
-            var currentType = property.DeclaringType?.BaseType;
+            var currentType = member.DeclaringType?.BaseType;
             while (currentType != null)
             {
-                var baseProperties = TypeUtils.GetRelevantAndBaseProperties(currentType).Where(p => p.Name == property.Name);
+                var baseProperties = TypeUtils.GetRelevantAndBaseProperties(currentType).Where(p => p.Name == member.Name);
                 allPropertiesToCheckForIgnore.AddRange(baseProperties);
                 currentType = currentType.BaseType;
             }
@@ -91,22 +92,51 @@ namespace TSTypeGen
                 }
             }
 
-            string name = FindNameFromJsonPropertyAttribute(property);
+            string name = FindNameFromJsonPropertyAttribute(member);
 
             if (string.IsNullOrEmpty(name))
             {
-                name = StringUtils.ToCamelCase(property.Name);
+                name = StringUtils.ToCamelCase(member.Name);
             }
 
-            var isOptional = TypeUtils.GetCustomAttributesData(property).FirstOrDefault(a => a.AttributeType.Name == Constants.TypeScriptOptionalAttributeName) != null;
+            var isOptional = TypeUtils.GetCustomAttributesData(member).FirstOrDefault(a => a.AttributeType.Name == Constants.TypeScriptOptionalAttributeName) != null;
 
-            return new TsInterfaceMember(name, BuildTsTypeReferenceToPropertyType(property, config, currentTsNamespace), isOptional);
+            return new TsInterfaceMember(name, BuildTsTypeReferenceToPropertyType(member, config, currentTsNamespace, isOptional), isOptional);
         }
 
-        private static TsTypeReference BuildTsTypeReferenceToPropertyType(PropertyInfo property, TypeBuilderConfig config, string currentTsNamespace)
+        private static TsTypeReference BuildTsTypeReferenceToPropertyType(MemberInfo member, TypeBuilderConfig config, string currentTsNamespace, bool isOptional)
         {
-            var type = property.PropertyType;
-            var typeScriptTypeAttribute = GetTypeScriptTypeAttribute(property);
+            if (member is FieldInfo fieldInfo && fieldInfo.IsLiteral)
+            {
+                var typeValue = default(string);
+                var constantValue = fieldInfo.GetRawConstantValue();
+                if (constantValue is string s)
+                {
+                    typeValue = $"'{s}'";
+                }
+                else if (constantValue is double d)
+                {
+                    typeValue = d.ToString(CultureInfo.InvariantCulture);
+                }
+                else if (constantValue is float f)
+                {
+                    typeValue = f.ToString(CultureInfo.InvariantCulture);
+                }
+                else if (constantValue is int i)
+                {
+                    typeValue = i.ToString(CultureInfo.InvariantCulture);
+                }
+                else if (constantValue is long l)
+                {
+                    typeValue = l.ToString(CultureInfo.InvariantCulture);
+                }
+
+                if (typeValue != default)
+                    return TsTypeReference.Simple(typeValue, isOptional);
+            }
+
+            var type = member is PropertyInfo propertyInfo ? propertyInfo.PropertyType : ((FieldInfo)member).FieldType;
+            var typeScriptTypeAttribute = GetTypeScriptTypeAttribute(member);
             if (typeScriptTypeAttribute != null)
             {
                 if (typeScriptTypeAttribute.ConstructorArguments[0].Value is string typeString)
@@ -122,9 +152,9 @@ namespace TSTypeGen
             return BuildTsTypeReference(type, config, currentTsNamespace, false);
         }
 
-        private static CustomAttributeData GetTypeScriptTypeAttribute(PropertyInfo property)
+        private static CustomAttributeData GetTypeScriptTypeAttribute(MemberInfo member)
         {
-            return GetTypeScriptTypeAttribute(TypeUtils.GetCustomAttributesData(property));
+            return GetTypeScriptTypeAttribute(TypeUtils.GetCustomAttributesData(member));
         }
 
         private static CustomAttributeData GetTypeScriptTypeAttribute(Type type)
@@ -480,6 +510,7 @@ namespace TSTypeGen
             else
             {
                 var properties = TypeUtils.GetRelevantProperties(type);
+                var fields = TypeUtils.GetRelevantFields(type);
 
                 IList<Type> extends;
                 if (type.IsInterface)
@@ -512,8 +543,13 @@ namespace TSTypeGen
                     parentDefToAugument = await BuildTsTypeDefinitionAsync(parentToAugument, config, generatorContext);
                 }
 
+                var members = new List<TsInterfaceMember>();
+
+                members.AddRange(properties.Select(m => BuildMember(m, type.GetInterfaces(), config, tsNamespace)).Where(x => x != null));
+                members.AddRange(fields.Select(m => BuildMember(m, type.GetInterfaces(), config, tsNamespace)).Where(x => x != null));
+
                 return TsTypeDefinition.Interface(type,
-                                                  properties.Select(p => BuildMember(p, type.GetInterfaces(), config, tsNamespace)).Where(x => x != null),
+                                                  members,
                                                   extends.Select(e => BuildTsTypeReference(e, config, tsNamespace, true)),
                                                   type.GetTypeInfo().GenericTypeParameters.Select(TypeUtils.GetNameWithoutGenericArity),
                                                   GetDerivedTypes(type, config, tsNamespace, generatorContext),

@@ -185,6 +185,13 @@ declare namespace Test {
     prop5: string[];
   }
 
+  interface TestGenerateFieldsClass1 {
+    prop1: 1;
+    prop2: 2;
+    prop3: 3.3;
+    prop4: 'prop4';
+  }
+
   interface TestGenerateTypeMemberBase {
     prop1: number;
   }
