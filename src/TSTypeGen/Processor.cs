@@ -57,7 +57,7 @@ namespace TSTypeGen
                 }
 
                 var loadedPaths = new List<string>();
-                var assemblies = new List<Assembly>();
+                var assemblies = new List<(Assembly Assembly, string XmlCommentsFile)>();
                 var result = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(_config.BasePath)));
 
                 var addedDlls = new List<string>();
@@ -95,8 +95,14 @@ namespace TSTypeGen
                         {
                             var assembly = mlc.LoadFromAssemblyPath(fullPath);
 
-                            if (!assemblies.Contains(assembly))
-                                assemblies.Add(assembly);
+                            var xmlCommentsFilePath = Path.ChangeExtension(fullPath, ".xml");
+                            if (!File.Exists(xmlCommentsFilePath))
+                            {
+                                xmlCommentsFilePath = null;
+                            }
+
+                            if (!assemblies.Contains((assembly, xmlCommentsFilePath)))
+                                assemblies.Add((assembly, xmlCommentsFilePath));
                         }
                         catch (Exception)
                         {

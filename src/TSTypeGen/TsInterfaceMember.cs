@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace TSTypeGen
 {
     public class TsInterfaceMember
@@ -5,11 +7,13 @@ namespace TSTypeGen
         public bool IsOptional { get; set; }
         public string Name { get; }
         public TsTypeReference Type { get; }
+        public MemberInfo MemberInfo { get; }
 
-        public TsInterfaceMember(string name, TsTypeReference type, bool isOptional)
+        public TsInterfaceMember(string name, TsTypeReference type, MemberInfo memberInfo, bool isOptional)
         {
             Name = name;
             Type = type;
+            MemberInfo = memberInfo;
             IsOptional = isOptional;
         }
     }

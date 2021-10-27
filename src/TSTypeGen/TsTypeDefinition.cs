@@ -13,7 +13,7 @@ namespace TSTypeGen
     public abstract class TsTypeDefinition
     {
         public string Name { get; }
-        public abstract string GetSource(string outputFilePath, Config config);
+        public abstract string GetSource(string outputFilePath, Config config, GeneratorContext generatorContext);
 
         private TsTypeDefinition(string name)
         {
@@ -67,7 +67,7 @@ namespace TSTypeGen
                 _typeMemberName = typeMemberName;
             }
 
-            public override string GetSource(string outputFilePath, Config config)
+            public override string GetSource(string outputFilePath, Config config, GeneratorContext generatorContext)
             {
                 var indent = "  ";
 
@@ -76,6 +76,8 @@ namespace TSTypeGen
                 var name = Name;
                 if (_parentToAugument != null)
                     name = _parentToAugument.Name;
+
+                var typeScriptClassComment = generatorContext.GetTypeScriptComment(_type);
 
                 if (TypeBuilder.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
                 {
@@ -93,7 +95,16 @@ namespace TSTypeGen
 
                     result.Append($"{indent}/**");
 
-                    if (canonicalType != null)
+                    if (typeScriptClassComment != null)
+                    {
+                        result.Append(config.NewLine);
+                        result.Append(FormatTypeScriptComment(typeScriptClassComment, indent, config.NewLine));
+                        result.Append(config.NewLine);
+                        result.Append($"{indent} *");
+                        result.Append(config.NewLine);
+                    }
+
+                    if (canonicalType != null || typeScriptClassComment != null)
                     {
                         result.Append(config.NewLine);
                         result.Append($"{indent} * {dotNetTypeComment}");
@@ -108,6 +119,18 @@ namespace TSTypeGen
                     }
 
                     result.Append(config.NewLine);
+                }
+                else
+                {
+                    if (typeScriptClassComment != null)
+                    {
+                        result.Append($"{indent}/**");
+                        result.Append(config.NewLine);
+                        result.Append(FormatTypeScriptComment(typeScriptClassComment, indent, config.NewLine));
+                        result.Append(config.NewLine);
+                        result.Append($"{indent} */");
+                        result.Append(config.NewLine);
+                    }
                 }
 
                 result.Append($"{indent}interface {name}");
@@ -151,6 +174,16 @@ namespace TSTypeGen
                         if (m.IsOptional || m.Type.IsOptional)
                             optional = "?";
                     }
+                    var typeScriptMemberComment = generatorContext.GetTypeScriptComment(m.MemberInfo);
+                    if (typeScriptMemberComment != null)
+                    {
+                        result.Append($"{indent}  /**");
+                        result.Append(config.NewLine);
+                        result.Append(FormatTypeScriptComment(typeScriptMemberComment, indent + "  ", config.NewLine));
+                        result.Append(config.NewLine);
+                        result.Append($"{indent}   */");
+                        result.Append(config.NewLine);
+                    }
                     result.Append($"{indent}  {FixName(m.Name)}{optional}: {WrapType(m.Type.GetSource(), memberTypeWrapper)};");
                     result.Append(config.NewLine);
                 }
@@ -180,6 +213,11 @@ namespace TSTypeGen
             }
         }
 
+        private string FormatTypeScriptComment(List<string> typeScriptComment, string indent, string newLine)
+        {
+            return string.Join(newLine, typeScriptComment.Select(line => $"{indent} * {line}"));
+        }
+
         private class EnumType : TsTypeDefinition
         {
             private readonly ImmutableArray<string> _members;
@@ -189,7 +227,7 @@ namespace TSTypeGen
                 _members = ImmutableArray.CreateRange(members);
             }
 
-            public override string GetSource(string outputFilePath, Config config)
+            public override string GetSource(string outputFilePath, Config config, GeneratorContext generatorContext)
             {
                 var sb = new StringBuilder();
                 var indent = "  ";
