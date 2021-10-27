@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace TSTypeGen.Tests
@@ -25,9 +20,9 @@ namespace TSTypeGen.Tests
             {
                 BasePath = assemblyLocation,
                 OutputPath = assemblyLocation,
-                DllPatterns = new List<string> {"TSTypeGen.Tests.Main.dll", "TSTypeGen.Tests.Shared.dll"},
+                DllPatterns = new List<string> { "TSTypeGen.Tests.Main.dll", "TSTypeGen.Tests.Shared.dll" },
                 CustomTypeScriptIgnoreAttributeFullName = "TSTypeGen.Tests.Shared.CustomTypeScriptIgnoreAttribute",
-                NewLine = "\n"
+                NewLine = Environment.NewLine
             };
 
             var processor = new Processor(config);
