@@ -475,22 +475,29 @@ namespace TSTypeGen
         }
 
 
-        internal static string GetWrapperTypeForMembers(Type type)
+        internal static string GetWrapperTypeForMembers(Type type, Config config)
         {
+            if ((config.PropertyWrappers?.Count ?? 0) == 0)
+                return null;
+
             var baseTypes = type.GetInterfaces().ToList();
             if (type.BaseType != null)
                 baseTypes.Add(type.BaseType);
 
-            static string GetWrapperType(Type type)
+            string GetWrapperType(Type type)
             {
-                var attr = TypeUtils.GetCustomAttributesData(type).FirstOrDefault(a => a.AttributeType.Name == Constants.TypeScriptGenericWrapperTypeForMembersAttributeName);
-                return attr != null ? (string)attr.ConstructorArguments[0].Value : null;
-            }
+                if (type.FullName == null)
+                    return null;
 
+                if (config.PropertyWrappers.ContainsKey(type.FullName))
+                    return config.PropertyWrappers[type.FullName];
+
+                return null;
+            }
 
             foreach (var baseType in baseTypes)
             {
-               var wrapperType =  GetWrapperType(baseType);
+                var wrapperType = GetWrapperType(baseType);
                 if (!string.IsNullOrEmpty(wrapperType))
                     return wrapperType;
             }

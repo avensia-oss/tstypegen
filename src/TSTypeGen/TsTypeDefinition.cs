@@ -165,7 +165,7 @@ namespace TSTypeGen
                     result.Append(config.NewLine);
                 }
 
-                var memberTypeWrapper = TypeBuilder.GetWrapperTypeForMembers(_type);
+                var memberTypeWrapper = TypeBuilder.GetWrapperTypeForMembers(_type, config);
                 foreach (var m in _members)
                 {
                     var optional = "";

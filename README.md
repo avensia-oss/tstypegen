@@ -43,12 +43,13 @@ After that you can add that attribute to the classes etc that you want to genera
 
 The config file is a JSON with the following options:
 
-- newLine: The character(s) to use to generate new lines, defaults to "\n".
-- basePath: Optional base path for where to find files. If omitted the base path becomes the path to the config file.
-- outputPath: Optional path to where generated d.ts-files are placed. If omitted the output path becomes the base path.
-- dllPatterns: An array of glob patterns to find dll files to inspect.
-- typeMappings: A dictionary that maps type full C# names (including namespaces) to corresponding TypeScript types.
-- customTypeScriptIgnoreAttributeFullName: Name of a custom attribute to treat the same as `[JsonIgnore]` and `[TypeScriptIgnore]`
+- `newLine`: The character(s) to use to generate new lines, defaults to "\n".
+- `basePath`: Optional base path for where to find files. If omitted the base path becomes the path to the config file.
+- `outputPath`: Optional path to where generated d.ts-files are placed. If omitted the output path becomes the base path.
+- `dllPatterns`: An array of glob patterns to find dll files to inspect.
+- `typeMappings`: A dictionary that maps type full C# names (including namespaces) to corresponding TypeScript types.
+- `customTypeScriptIgnoreAttributeFullName`: Name of a custom attribute to treat the same as `[JsonIgnore]` and `[TypeScriptIgnore]`
+- `propertyWrappers`: A dictionary that defines wrappers for properties in the listed types
 
 Example:
 

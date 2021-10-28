@@ -246,17 +246,17 @@ declare namespace Test {
   }
 
   interface TestGenericTypeWrapperBase {
-    prop1: Scope.EpiProperty<number>;
+    prop1: Scope.Property<number>;
   }
 
   interface TestGenericTypeWrapperBase1 extends TestGenericTypeWrapperBase {
-    prop2: Scope.EpiProperty<string>;
+    prop2: Scope.Property<string>;
   }
 
   interface TestGenericTypeWrapperClass1 {
-    prop1: Scope.EpiProperty<number>;
-    prop2: Scope.EpiProperty<string>;
-    prop3: Scope.EpiProperty<TestGenericTypeWrapperClass2>;
+    prop1: Scope.Property<number>;
+    prop2: Scope.Property<string>;
+    prop3: Scope.Property<TestGenericTypeWrapperClass2>;
   }
 
   interface TestGenericTypeWrapperClass2 {
