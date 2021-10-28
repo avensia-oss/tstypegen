@@ -13,6 +13,7 @@ namespace TSTypeGen
         public string OutputPath { get; set; }
         public List<string> DllPatterns { get; set; }
         public Dictionary<string, string> TypeMappings { get; } = new Dictionary<string, string>();
+        public Dictionary<string, string> PropertyWrappers { get; set;  } = new Dictionary<string, string>();
         public string CustomTypeScriptIgnoreAttributeFullName { get; set; }
 
         public static Config ReadFromFile(string path)

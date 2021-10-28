@@ -2,6 +2,10 @@
 
 namespace TSTypeGen.Tests.Main
 {
+    public interface WrapMe
+    {
+
+    }
 
     [GenerateTypeScriptDefinition]
     public class TestGenericTypeWrapperClass2
@@ -10,8 +14,7 @@ namespace TSTypeGen.Tests.Main
     }
 
     [GenerateTypeScriptDefinition]
-    [TypeScriptGenericWrapperTypeForMembers("Scope.EpiProperty")]
-    public class TestGenericTypeWrapperClass1
+    public class TestGenericTypeWrapperClass1 : WrapMe
     {
         public int Prop1 { get; set; }
 

@@ -15,7 +15,6 @@ namespace TSTypeGen
         public const string TypeScriptAugumentParentAttributeName = "TypeScriptAugumentParentAttribute";
         public const string TypeScriptOptionalAttributeName = "TypeScriptOptionalAttribute";
         public const string TypeScriptIgnoreAttributeName = "TypeScriptIgnoreAttribute";
-        public const string TypeScriptGenericWrapperTypeForMembersAttributeName = "TypeScriptGenericWrapperTypeForMembersAttribute";
         public const string GenerateTypeScriptDerivedTypesUnionAttributeName = "GenerateTypeScriptDerivedTypesUnionAttribute";
         public const string GenerateTypeScriptTypeMemberAttributeName = "GenerateTypeScriptTypeMemberAttribute";
         public const string GenerateTypeScriptDotNetNameAttributeName = "GenerateTypeScriptDotNetNameAttribute";

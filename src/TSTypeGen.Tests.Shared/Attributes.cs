@@ -3,9 +3,6 @@
 namespace TSTypeGen.Tests.Shared
 {
     public sealed class GenerateTypeScriptDefinitionAttribute : Attribute { public GenerateTypeScriptDefinitionAttribute() { } public GenerateTypeScriptDefinitionAttribute(bool generate) { } }
-
-    public sealed class TypeScriptGenericWrapperTypeForMembersAttribute : Attribute { public TypeScriptGenericWrapperTypeForMembersAttribute(string name) { } }
-
     public sealed class GenerateTypeScriptNamespaceAttribute : Attribute { public GenerateTypeScriptNamespaceAttribute(string name) { } }
     public sealed class GenerateDotNetTypeNamesAsJsDocCommentAttribute : Attribute { public GenerateDotNetTypeNamesAsJsDocCommentAttribute() { } }
     public sealed class GenerateCanonicalDotNetTypeScriptTypeAttribute : Attribute { public GenerateCanonicalDotNetTypeScriptTypeAttribute() { } }
