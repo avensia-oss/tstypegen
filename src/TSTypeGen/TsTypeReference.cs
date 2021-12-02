@@ -31,7 +31,33 @@ namespace TSTypeGen
             return new GenericTsTypeReference(genericType, arguments);
         }
 
+        public static TsTypeReference Wrap(TsTypeReference inner, bool isOptional)
+        {
+            return new WrappedTsTypeReference(inner, isOptional);
+        }
+
         public abstract bool Equals(TsTypeDefinition tsTypeDefinition);
+
+        private class WrappedTsTypeReference : TsTypeReference
+        {
+            private readonly TsTypeReference _inner;
+
+            public WrappedTsTypeReference(TsTypeReference inner, bool isOptional)
+            {
+                _inner = inner;
+                IsOptional = isOptional;
+            }
+
+            public override bool Equals(TsTypeDefinition tsTypeDefinition)
+            {
+                return _inner.Equals(tsTypeDefinition);
+            }
+
+            public override string GetSource()
+            {
+                return _inner.GetSource();
+            }
+        }
 
         private class SimpleTsTypeReference : TsTypeReference
         {

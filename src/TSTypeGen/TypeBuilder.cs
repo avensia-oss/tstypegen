@@ -200,7 +200,7 @@ namespace TSTypeGen
 
             if (typeFullName != null && config.TypeMappings.TryGetValue(typeFullName, out var mappedType))
             {
-                return mappedType;
+                return TsTypeReference.Wrap(mappedType, isOptional);
             }
 
             var typeScriptTypeAttribute = GetTypeScriptTypeAttribute(type);
@@ -267,11 +267,11 @@ namespace TSTypeGen
                     var result = default(TsTypeReference);
                     if (namespaceName == currentTsNamespace)
                     {
-                        result = TsTypeReference.Simple(derivedTypesUnionName ?? typeName);
+                        result = TsTypeReference.Simple(derivedTypesUnionName ?? typeName, isOptional);
                     }
                     else
                     {
-                        result = TsTypeReference.Simple(namespaceName + "." + (derivedTypesUnionName ?? typeName));
+                        result = TsTypeReference.Simple(namespaceName + "." + (derivedTypesUnionName ?? typeName), isOptional);
                     }
 
                     if (result != null)
@@ -287,7 +287,7 @@ namespace TSTypeGen
                 }
             }
 
-            return TsTypeReference.Simple("unknown");
+            return TsTypeReference.Simple("unknown", isOptional);
         }
 
         private static Type GetUnderlyingNullableType(Type type)
