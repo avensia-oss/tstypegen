@@ -22,7 +22,7 @@ namespace TSTypeGen.Tests
                 OutputPath = assemblyLocation,
                 DllPatterns = new List<string> {"TSTypeGen.Tests.Main.dll", "TSTypeGen.Tests.Shared.dll"},
                 CustomTypeScriptIgnoreAttributeFullName = "TSTypeGen.Tests.Shared.CustomTypeScriptIgnoreAttribute",
-                NewLine = Environment.NewLine,
+                NewLine = "\n"
                 PropertyWrappers = new Dictionary<string, string>(){ { "TSTypeGen.Tests.Main.WrapMe", "Wrapper"} }
             };
 
