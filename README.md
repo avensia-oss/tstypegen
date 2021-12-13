@@ -1,3 +1,5 @@
+[![.NET](https://github.com/avensia-oss/tstypegen/actions/workflows/dotnet.yml/badge.svg)](https://github.com/avensia-oss/tstypegen/actions/workflows/dotnet.yml)
+
 This program will generate TypeScript definitions from C# types. It's built on .NET Core which makes it possible to use on Windows, Mac and Linux.
 
 ## Install
