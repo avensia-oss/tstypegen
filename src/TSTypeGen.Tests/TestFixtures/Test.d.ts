@@ -341,9 +341,10 @@ declare namespace Test {
     prop10?: number;
     prop11?: number;
     prop12?: boolean;
-    prop13: TestOptionalsStruct;
-    prop14: TestOptionalsStruct[];
-    prop15: {[item: number]: TestOptionalsStruct};
+    prop13?: TestOptionalsStruct;
+    prop14: (TestOptionalsStruct | undefined)[];
+    prop15: {[item: number]: TestOptionalsStruct | undefined};
+    prop16?: external.CustomDateTime;
   }
 
   interface TestOptionalsStruct {

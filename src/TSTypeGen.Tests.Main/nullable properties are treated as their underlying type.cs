@@ -26,8 +26,8 @@ namespace TSTypeGen.Tests.Main
         public decimal? Prop11 { get; set; }
         public bool? Prop12 { get; set; }
         public TestOptionalsStruct? Prop13 { get; set; }
-
         public IEnumerable<TestOptionalsStruct?> Prop14 { get; set; }
         public Dictionary<int, TestOptionalsStruct?> Prop15 { get; set; }
+        public DateTime? Prop16 { get; set; }
     }
 }
