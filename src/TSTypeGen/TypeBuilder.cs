@@ -264,14 +264,22 @@ namespace TSTypeGen
 
                     var typeName = TypeUtils.GetNameWithoutGenericArity(type);
 
+                    var prefix = "";
+                    var suffix = "";
+                    if (type.IsEnum && config.WrapConstEnumsInTemplateStrings)
+                    {
+                        prefix = "`${";
+                        suffix = "}`";
+                    }
+
                     var result = default(TsTypeReference);
                     if (namespaceName == currentTsNamespace)
                     {
-                        result = TsTypeReference.Simple(derivedTypesUnionName ?? typeName, isOptional);
+                        result = TsTypeReference.Simple(prefix + (derivedTypesUnionName ?? typeName) + suffix, isOptional);
                     }
                     else
                     {
-                        result = TsTypeReference.Simple(namespaceName + "." + (derivedTypesUnionName ?? typeName), isOptional);
+                        result = TsTypeReference.Simple(prefix + namespaceName + "." + (derivedTypesUnionName ?? typeName) + suffix, isOptional);
                     }
 
                     if (result != null)

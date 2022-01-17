@@ -7,11 +7,13 @@ namespace TSTypeGen
     {
         public ImmutableDictionary<string, TsTypeReference> TypeMappings { get; }
         public string CustomTypeScriptIgnoreAttributeFullName { get; set; }
+        public bool WrapConstEnumsInTemplateStrings { get; set; }
 
-        public TypeBuilderConfig(ImmutableDictionary<string, TsTypeReference> typeMappings, string customTypeScriptIgnoreAttributeFullName)
+        public TypeBuilderConfig(ImmutableDictionary<string, TsTypeReference> typeMappings, string customTypeScriptIgnoreAttributeFullName, bool wrapConstEnumsInTemplateStrings)
         {
             TypeMappings = typeMappings;
             CustomTypeScriptIgnoreAttributeFullName = customTypeScriptIgnoreAttributeFullName;
+            WrapConstEnumsInTemplateStrings = wrapConstEnumsInTemplateStrings;
         }
     }
 }
