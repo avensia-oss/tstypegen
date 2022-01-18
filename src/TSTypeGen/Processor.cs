@@ -230,7 +230,7 @@ namespace TSTypeGen
             }
 
             var mappings = ImmutableDictionary.CreateRange(typeMappings);
-            _typeBuilderConfig = new TypeBuilderConfig(mappings, _config.CustomTypeScriptIgnoreAttributeFullName);
+            _typeBuilderConfig = new TypeBuilderConfig(mappings, _config.CustomTypeScriptIgnoreAttributeFullName, _config.WrapConstEnumsInTemplateStrings);
         }
 
         private async Task<bool> LoadAllDllsAndUpdateOrVerifyAllTypes(bool verify)
