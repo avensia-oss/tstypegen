@@ -254,11 +254,14 @@ to make sure the tests still pass. Then you run:
 dotnet publish src/TSTypeGen/TSTypeGen.csproj -o ./bin
 ```
 
-which creates a `bin/` folder in the root with the exe and dll files. After that you run:
+which creates a `bin/` folder in the root with the exe and dll files. 
+
+Set a new version in the package.json. Then run:
 
 ```
 npm publish
 ```
+Push the version change in the package.json.
 
 ## Additional details
 
