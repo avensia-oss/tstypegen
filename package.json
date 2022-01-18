@@ -4,6 +4,9 @@
   "description": "A tool to generate TypeScript types from C# types",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
+  "bin": {
+    "tstypegen": "./dist/cli.js"
+  },
   "repository": "https://github.com/avensia-oss/tstypegen",
   "author": "Anders Ekdahl <anders.ekdahl@avensia.com>",
   "license": "MIT",
@@ -20,7 +23,6 @@
     "bin/*.deps.json",
     "dist/"
   ],
-  "bin": "./bin/TSTypeGen.exe",
   "devDependencies": {
     "@types/node": "^14.14.25",
     "typescript": "~3.4.5"

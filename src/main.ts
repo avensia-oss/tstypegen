@@ -24,7 +24,7 @@ function tsTypeGen(options: (Solution | Project) & Options) {
   if ('configFile' in options) {
     args.push(`--cfg=${JSON.stringify(options.configFile)}`);
   } else {
-    throw new Error('You must specify a TSTypeGen config file');
+    throw new Error('You must specify a TSTypeGen config file.');
   }
 
   if (options.verify) {
@@ -36,7 +36,7 @@ function tsTypeGen(options: (Solution | Project) & Options) {
       if (error) {
         if (stderr) {
           process.stdout.write(stderr);
-          reject(new Error());
+          reject();
         } else {
           reject(error);
         }
@@ -44,10 +44,10 @@ function tsTypeGen(options: (Solution | Project) & Options) {
         if (stdout) {
           process.stdout.write(stdout);
         } else {
-          console.log(
+          console.info(
             options.verify
-              ? 'All type definitions verified'
-              : 'No type definitions changed'
+              ? 'All type definitions verified.'
+              : 'No type definitions changed.'
           );
         }
 
