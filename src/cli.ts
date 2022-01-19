@@ -83,13 +83,21 @@ async function main() {
 function getVariable(names: string[], expectBool?: false): string | undefined;
 function getVariable(names: string[], expectBool: true): boolean;
 function getVariable(names: string[], expectBool = false) {
-  for (const arg of args) {
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+
     for (const name of names) {
-      if (expectBool && arg === name) {
-        return true;
-      }
-      if (!expectBool && arg.startsWith(`${name}=`)) {
-        return arg.slice(name.length + 1);
+      if (expectBool) {
+        if (arg === name) {
+          return true;
+        }
+      } else {
+        if (arg.startsWith(`${name}=`)) {
+          return arg.slice(name.length + 1);
+        }
+        if (arg === name) {
+          return args[++i];
+        }
       }
     }
   }
