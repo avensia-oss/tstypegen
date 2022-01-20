@@ -1,6 +1,6 @@
 {
   "name": "@avensia-oss/tstypegen",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "A tool to generate TypeScript types from C# types",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
