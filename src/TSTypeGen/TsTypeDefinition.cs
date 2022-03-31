@@ -104,7 +104,7 @@ namespace TSTypeGen
                         result.Append(config.NewLine);
                     }
 
-                    if (canonicalType != null || typeScriptClassComment != null)
+                    if (canonicalType != null)
                     {
                         result.Append(config.NewLine);
                         result.Append($"{indent} * {dotNetTypeComment}");
