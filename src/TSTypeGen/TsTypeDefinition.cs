@@ -78,6 +78,16 @@ namespace TSTypeGen
                     name = _parentToAugument.Name;
 
                 var typeScriptClassComment = generatorContext.GetTypeScriptComment(_type);
+                if (typeScriptClassComment == null)
+                {
+                    var interfaces = _type.GetInterfaces();
+                    foreach (var iface in interfaces)
+                    {
+                        typeScriptClassComment = generatorContext.GetTypeScriptComment(iface);
+                        if (typeScriptClassComment != null)
+                            break;
+                    }
+                }
 
                 if (TypeBuilder.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
                 {
@@ -174,7 +184,19 @@ namespace TSTypeGen
                         if (m.IsOptional || m.Type.IsOptional)
                             optional = "?";
                     }
+
                     var typeScriptMemberComment = generatorContext.GetTypeScriptComment(m.MemberInfo);
+                    if (typeScriptMemberComment == null)
+                    {
+                        var interfaceMembers = m.MemberInfo.DeclaringType.GetInterfaces().SelectMany(i => i.GetMember(m.MemberInfo.Name)).Where(m => m != null).ToList();
+                        foreach (var interfaceMember in interfaceMembers)
+                        {
+                            typeScriptMemberComment = generatorContext.GetTypeScriptComment(interfaceMember);
+                            if (typeScriptMemberComment != null)
+                                break;
+                        }
+                    }
+
                     if (typeScriptMemberComment != null)
                     {
                         result.Append($"{indent}  /**");
