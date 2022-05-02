@@ -324,6 +324,10 @@ declare namespace Test {
     Value2 = 'value2',
   }
 
+  interface TestOptionalPropertiesFromInterfaceClass {
+    prop1?: number;
+  }
+
   interface TestOptionalPropertiesNestedClass {
     nestedProp1: number;
   }

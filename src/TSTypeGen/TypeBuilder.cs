@@ -99,7 +99,10 @@ namespace TSTypeGen
                 name = StringUtils.ToCamelCase(member.Name);
             }
 
-            var isOptional = TypeUtils.GetCustomAttributesData(member).FirstOrDefault(a => a.AttributeType.Name == Constants.TypeScriptOptionalAttributeName) != null;
+            var membersToCheckForOptional = new List<MemberInfo> { member };
+            membersToCheckForOptional.AddRange(member.DeclaringType.GetInterfaces().SelectMany(i => i.GetMember(member.Name)).Where(m => m != null));
+
+            var isOptional = membersToCheckForOptional.SelectMany(m => TypeUtils.GetCustomAttributesData(m)).FirstOrDefault(a => a.AttributeType.Name == Constants.TypeScriptOptionalAttributeName) != null;
 
             return new TsInterfaceMember(name, BuildTsTypeReferenceToPropertyType(member, config, currentTsNamespace, isOptional), member, isOptional);
         }

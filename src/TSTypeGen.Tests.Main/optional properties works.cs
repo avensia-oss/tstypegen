@@ -34,4 +34,16 @@ namespace TSTypeGen.Tests.Main
         [TypeScriptOptional]
         public TestOptionalPropertiesNestedClass Prop6 { get; set; }
     }
+
+    public interface InterfaceWithOptional
+    {
+        [TypeScriptOptional]
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestOptionalPropertiesFromInterfaceClass : InterfaceWithOptional
+    {
+        public int Prop1 { get; set; }
+    }
 }
