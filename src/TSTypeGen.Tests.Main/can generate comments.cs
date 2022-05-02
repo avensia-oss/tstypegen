@@ -48,4 +48,21 @@ namespace TSTypeGen.Tests.Main
         public int Prop5 { get; set; }
         public int Prop6 { get; set; }
     }
+
+    /// <summary>
+    /// This is a comment on the interface
+    /// </summary>
+    public interface IInterfaceWithComments
+    {
+        /// <summary>
+        /// This is an interface comment
+        /// </summary>
+        public int Prop1 { get; set; }
+    }
+
+    [GenerateTypeScriptDefinition]
+    public class TestClassWithInterface : IInterfaceWithComments
+    {
+        public int Prop1 { get; set; }
+    }
 }

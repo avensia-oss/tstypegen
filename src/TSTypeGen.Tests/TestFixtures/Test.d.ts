@@ -145,6 +145,16 @@ declare namespace Test {
     prop6: number;
   }
 
+  /**
+   * This is a comment on the interface
+   */
+  interface TestClassWithInterface {
+    /**
+     * This is an interface comment
+     */
+    prop1: number;
+  }
+
   const enum TestConstEnum {
     FirstValue = 'firstValue',
     SecondValue = 'secondValue',
