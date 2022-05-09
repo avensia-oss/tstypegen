@@ -89,6 +89,13 @@ namespace TSTypeGen
                     }
                 }
 
+                var deprecatedAttr = TypeUtils.GetCustomAttributesData(_type).FirstOrDefault(a => a.AttributeType.Name == Constants.ObsoleteAttributeName);
+                var isDeprecated = deprecatedAttr != null;
+                var deprecatedComment = deprecatedAttr?.ConstructorArguments?.FirstOrDefault().Value as string;
+
+                var dotNetType = default(Type);
+                var canonicalType = default(Type);
+
                 if (TypeBuilder.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
                 {
                     var dotNetTypeAttr = TypeUtils.GetCustomAttributesData(_type).FirstOrDefault(a =>
@@ -96,52 +103,16 @@ namespace TSTypeGen
                         a.ConstructorArguments.Count == 1
                     );
 
-                    var type = _type;
+                    dotNetType = _type;
                     if (dotNetTypeAttr?.ConstructorArguments[0].Value is Type t)
-                        type = t;
+                        dotNetType = t;
 
-                    var canonicalType = TypeBuilder.GetCanonicalDotNetType(type);
-                    var dotNetTypeComment = $"@DotNetTypeName {TypeUtils.GetFullName(type)},{type.Assembly.GetName().Name}";
-
-                    result.Append($"{indent}/**");
-
-                    if (typeScriptClassComment != null)
-                    {
-                        result.Append(config.NewLine);
-                        result.Append(FormatTypeScriptComment(typeScriptClassComment, indent, config.NewLine));
-                        result.Append(config.NewLine);
-                        result.Append($"{indent} *");
-                        result.Append(config.NewLine);
-                    }
-
-                    if (canonicalType != null)
-                    {
-                        result.Append(config.NewLine);
-                        result.Append($"{indent} * {dotNetTypeComment}");
-                        result.Append(config.NewLine);
-                        result.Append($"{indent} * @DotNetCanonicalTypeName {TypeUtils.GetFullName(canonicalType)},{canonicalType.Assembly.GetName().Name}");
-                        result.Append(config.NewLine);
-                        result.Append($"{indent} */");
-                    }
-                    else
-                    {
-                        result.Append($" {dotNetTypeComment} */");
-                    }
-
-                    result.Append(config.NewLine);
+                    canonicalType = TypeBuilder.GetCanonicalDotNetType(dotNetType);
                 }
-                else
-                {
-                    if (typeScriptClassComment != null)
-                    {
-                        result.Append($"{indent}/**");
-                        result.Append(config.NewLine);
-                        result.Append(FormatTypeScriptComment(typeScriptClassComment, indent, config.NewLine));
-                        result.Append(config.NewLine);
-                        result.Append($"{indent} */");
-                        result.Append(config.NewLine);
-                    }
-                }
+
+                var interfaceComments = GetInterfaceJsDocComment(indent, config, typeScriptClassComment, dotNetType, canonicalType, isDeprecated, deprecatedComment);
+                if (interfaceComments != null)
+                    result.Append(interfaceComments);
 
                 result.Append($"{indent}interface {name}");
                 if (_typeParameters.Length > 0)
@@ -197,15 +168,14 @@ namespace TSTypeGen
                         }
                     }
 
-                    if (typeScriptMemberComment != null)
-                    {
-                        result.Append($"{indent}  /**");
-                        result.Append(config.NewLine);
-                        result.Append(FormatTypeScriptComment(typeScriptMemberComment, indent + "  ", config.NewLine));
-                        result.Append(config.NewLine);
-                        result.Append($"{indent}   */");
-                        result.Append(config.NewLine);
-                    }
+                    var memberDeprecatedAttr = TypeUtils.GetCustomAttributesData(m.MemberInfo).FirstOrDefault(a => a.AttributeType.Name == Constants.ObsoleteAttributeName);
+                    var memberIsDeprecated = memberDeprecatedAttr != null;
+                    var memberDeprecatedComment = memberDeprecatedAttr?.ConstructorArguments?.FirstOrDefault().Value as string;
+
+                    var memberComments = GetMemberJsDocComment(indent, config, typeScriptMemberComment, memberIsDeprecated, memberDeprecatedComment);
+                    if (memberComments != null)
+                        result.Append(memberComments);
+
                     result.Append($"{indent}  {FixName(m.Name)}{optional}: {WrapType(m.Type.GetSource(), memberTypeWrapper)};");
                     result.Append(config.NewLine);
                 }
@@ -235,9 +205,121 @@ namespace TSTypeGen
             }
         }
 
-        private string FormatTypeScriptComment(List<string> typeScriptComment, string indent, string newLine)
+        private string GetInterfaceJsDocComment(string indent, Config config, List<string> textComment, Type dotNetType, Type canonicalType, bool isDeprecated, string deprecatedComment)
         {
-            return string.Join(newLine, typeScriptComment.Select(line => $"{indent} * {line}"));
+            if (textComment == null && dotNetType == null && canonicalType == null && !isDeprecated)
+                return null;
+
+            var result = new StringBuilder();
+
+            result.Append($"{indent}/**");
+            var commentSections = 0;
+
+            if (dotNetType != null)
+                commentSections++;
+            if (canonicalType != null)
+                commentSections++;
+            if (isDeprecated)
+                commentSections++;
+
+            var shouldRenderCommentOnSingleLine = textComment == null && commentSections == 1;
+            var lineIndent = shouldRenderCommentOnSingleLine ? " " : indent + " * ";
+
+            if (!shouldRenderCommentOnSingleLine)
+                result.Append(config.NewLine);
+
+            if (textComment != null)
+            {
+                result.Append(FormatTypeScriptComment(textComment, indent, config.NewLine));
+                result.Append(config.NewLine);
+                if (commentSections > 0)
+                {
+                    result.Append($"{indent} *");
+                    result.Append(config.NewLine);
+                }
+            }
+
+            if (dotNetType != null)
+            {
+                result.Append($"{lineIndent}@DotNetTypeName {TypeUtils.GetFullName(dotNetType)},{dotNetType.Assembly.GetName().Name}");
+                if (!shouldRenderCommentOnSingleLine)
+                    result.Append(config.NewLine);
+            }
+
+            if (canonicalType != null)
+            {
+                result.Append($"{lineIndent}@DotNetCanonicalTypeName {TypeUtils.GetFullName(canonicalType)},{canonicalType.Assembly.GetName().Name}");
+                if (!shouldRenderCommentOnSingleLine)
+                    result.Append(config.NewLine);
+            }
+
+            if (isDeprecated)
+            {
+                result.Append($"{lineIndent}@deprecated{(string.IsNullOrEmpty(deprecatedComment) ? "" : " " + deprecatedComment)}");
+                if (!shouldRenderCommentOnSingleLine)
+                    result.Append(config.NewLine);
+            }
+
+            if (!shouldRenderCommentOnSingleLine)
+                result.Append($"{indent} */");
+            else
+                result.Append($" */");
+
+            result.Append(config.NewLine);
+
+            return result.ToString();
+        }
+
+        private string GetMemberJsDocComment(string indent, Config config, List<string> textComment, bool isDeprecated, string deprecatedComment)
+        {
+            if (textComment == null && !isDeprecated)
+                return null;
+
+            var result = new StringBuilder();
+
+            result.Append($"{indent}  /**");
+            var commentSections = 0;
+
+            if (isDeprecated)
+                commentSections++;
+
+            var shouldRenderCommentOnSingleLine = textComment == null && commentSections == 1;
+            var lineIndent = shouldRenderCommentOnSingleLine ? " " : indent + "   * ";
+
+            if (!shouldRenderCommentOnSingleLine)
+                result.Append(config.NewLine);
+
+            if (textComment != null)
+            {
+                result.Append(FormatTypeScriptComment(textComment, indent + "  ", config.NewLine));
+                result.Append(config.NewLine);
+                if (commentSections > 0)
+                {
+                    result.Append($"{indent}   *");
+                    result.Append(config.NewLine);
+                }
+            }
+
+            if (isDeprecated)
+            {
+                result.Append($"{lineIndent}@deprecated{(string.IsNullOrEmpty(deprecatedComment) ? "" : " " + deprecatedComment)}");
+                if (!shouldRenderCommentOnSingleLine)
+                    result.Append(config.NewLine);
+            }
+
+            if (!shouldRenderCommentOnSingleLine)
+                result.Append($"{indent}   */");
+            else
+                result.Append($" */");
+
+            result.Append(config.NewLine);
+
+            return result.ToString();
+        }
+
+        private string FormatTypeScriptComment(List<string> textComment, string indent, string newLine)
+        {
+            return string.Join(newLine, textComment.Select(line => $"{indent} * {line}"));
         }
 
         private class EnumType : TsTypeDefinition
