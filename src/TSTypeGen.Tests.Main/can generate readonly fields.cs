@@ -15,5 +15,6 @@ namespace TSTypeGen.Tests.Main
         public const long Prop2 = 2;
         public const double Prop3 = 3.3;
         public const string Prop4 = "prop4";
+        public const bool Prop5 = true;
     }
 }

@@ -234,6 +234,7 @@ declare namespace Test {
     prop2: 2;
     prop3: 3.3;
     prop4: 'prop4';
+    prop5: true;
   }
 
   interface TestGenerateTypeMemberBase {
