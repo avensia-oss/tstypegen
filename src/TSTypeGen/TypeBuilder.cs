@@ -133,6 +133,10 @@ namespace TSTypeGen
                 {
                     typeValue = l.ToString(CultureInfo.InvariantCulture);
                 }
+                else if (constantValue is bool b)
+                {
+                    typeValue = b ? "true" : "false";
+                }
 
                 if (typeValue != default)
                     return TsTypeReference.Simple(typeValue, isOptional);
