@@ -237,6 +237,47 @@ declare namespace Test {
     prop5: true;
   }
 
+  /** @deprecated */
+  interface TestGenerateObsoleteClass {
+    /** @deprecated */
+    prop1: number;
+  }
+
+  /** @deprecated Don't use this ok? */
+  interface TestGenerateObsoleteClassWithComment {
+    /** @deprecated If you use this you'll be fired */
+    prop1: number;
+  }
+
+  /**
+   * This should not be used
+   *
+   * @deprecated Don't use this ok?
+   */
+  interface TestGenerateObsoleteClassWithCommentAndSummary {
+    /**
+     * Don't use this ok?
+     *
+     * @deprecated If you use this you'll be fired
+     */
+    prop1: number;
+  }
+
+  /**
+   * This should not be used at all
+   *
+   * @DotNetTypeName TSTypeGen.Tests.Main.TestGenerateObsoleteClassWithCommentAndSummaryAndDotNetType,TSTypeGen.Tests.Main
+   * @deprecated Please don't use this ok?
+   */
+  interface TestGenerateObsoleteClassWithCommentAndSummaryAndDotNetType {
+    /**
+     * Don't use this ok?
+     *
+     * @deprecated If you use this you'll be fired!
+     */
+    prop1: number;
+  }
+
   interface TestGenerateTypeMemberBase {
     prop1: number;
   }
