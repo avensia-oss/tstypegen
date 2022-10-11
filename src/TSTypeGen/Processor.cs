@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
-using Nuclear.Assemblies.Resolvers;
 
 namespace TSTypeGen
 {
@@ -251,7 +249,48 @@ namespace TSTypeGen
                     await fileToGenerate.ApplyAsync(_typeBuilderConfig, _config, _generatorContext);
             }
 
+            if (_config.UseEmbeddedDeclarations)
+            {
+                foreach (var asm in _generatorContext.Assemblies)
+                {
+                    var embeddedDeclarations = GetEmbeddedDeclarations(asm);
+                    if (embeddedDeclarations != null)
+                    {
+                        foreach (var name in embeddedDeclarations.Keys)
+                        {
+                            var path = GetGeneratedNamespaceFilePath(name.Replace(".d.ts", ""));
+                            File.WriteAllText(path, embeddedDeclarations[name]);
+                        }
+                    }
+                }
+            }
+
             return success;
+        }
+
+        private Dictionary<string, string> GetEmbeddedDeclarations(Assembly assembly)
+        {
+            var resourceNames = assembly
+                .GetManifestResourceNames()
+                .Where(r => r.EndsWith(".d.ts"))
+                .ToArray();
+
+            if (resourceNames.Length == 0)
+                return null;
+
+            var declarations = new Dictionary<string, string>();
+
+            foreach (var resourceName in resourceNames)
+            {
+                var info = assembly.GetManifestResourceInfo(resourceName);
+                using (var reader = new StreamReader(assembly.GetManifestResourceStream(resourceName)))
+                {
+                    var declaration = reader.ReadToEnd();
+                    declarations.Add(resourceName, declaration);
+                }
+            }
+
+            return declarations;
         }
 
         private Task<bool> LoadAllDllsAndUpdateAllTypes()

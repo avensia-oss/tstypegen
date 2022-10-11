@@ -24,6 +24,7 @@ namespace TSTypeGen
         // const x: `${TheEnum}` = 'value';
         // Then both Babel and Typscript will be satisfied
         public bool WrapConstEnumsInTemplateStrings { get; set; }
+        public bool UseEmbeddedDeclarations { get; set; }
 
         public static Config ReadFromFile(string path)
         {
