@@ -25,6 +25,7 @@ namespace TSTypeGen
         // Then both Babel and Typscript will be satisfied
         public bool WrapConstEnumsInTemplateStrings { get; set; }
         public bool UseEmbeddedDeclarations { get; set; }
+        public bool UseConstEnums { get; set; } = true;
 
         public static Config ReadFromFile(string path)
         {

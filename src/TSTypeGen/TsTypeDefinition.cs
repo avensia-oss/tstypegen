@@ -336,16 +336,35 @@ namespace TSTypeGen
                 var sb = new StringBuilder();
                 var indent = "  ";
 
-                sb.Append($"{indent}const enum {Name} {{");
-                sb.Append(config.NewLine);
-                foreach (var member in _members)
+                if (config.UseConstEnums)
                 {
-                    sb.Append($"{indent}  {member} = '{StringUtils.ToCamelCase(member)}',");
+                    sb.Append($"{indent}const enum {Name} {{");
+                    sb.Append(config.NewLine);
+                    foreach (var member in _members)
+                    {
+                        sb.Append($"{indent}  {member} = '{StringUtils.ToCamelCase(member)}',");
+                        sb.Append(config.NewLine);
+                    }
+                    sb.Append($"{indent}}}");
                     sb.Append(config.NewLine);
                 }
-                sb.Append($"{indent}}}");
-                sb.Append(config.NewLine);
-
+                else
+                {
+                    sb.Append("type ").Append(Name).Append(" = ");
+                    if (_members.Length > 0)
+                    {
+                        sb.Append('\'').Append(StringUtils.ToCamelCase(_members[0])).Append('\'');
+                        for (int i = 1; i < _members.Length; i++)
+                        {
+                            sb.Append(" | '").Append(StringUtils.ToCamelCase(_members[i])).Append('\'');
+                        }
+                    }
+                    else
+                    {
+                        sb.Append("{}");
+                    }
+                    sb.AppendLine(";");
+                }
                 return sb.ToString();
             }
         }
