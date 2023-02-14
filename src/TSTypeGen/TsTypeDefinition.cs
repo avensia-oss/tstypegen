@@ -77,42 +77,45 @@ namespace TSTypeGen
                 if (_parentToAugument != null)
                     name = _parentToAugument.Name;
 
-                var typeScriptClassComment = generatorContext.GetTypeScriptComment(_type);
-                if (typeScriptClassComment == null)
+                if (config.GenerateComments)
                 {
-                    var interfaces = _type.GetInterfaces();
-                    foreach (var iface in interfaces)
+                    var typeScriptClassComment = generatorContext.GetTypeScriptComment(_type);
+                    if (typeScriptClassComment == null)
                     {
-                        typeScriptClassComment = generatorContext.GetTypeScriptComment(iface);
-                        if (typeScriptClassComment != null)
-                            break;
+                        var interfaces = _type.GetInterfaces();
+                        foreach (var iface in interfaces)
+                        {
+                            typeScriptClassComment = generatorContext.GetTypeScriptComment(iface);
+                            if (typeScriptClassComment != null)
+                                break;
+                        }
                     }
+
+                    var deprecatedAttr = TypeUtils.GetCustomAttributesData(_type).FirstOrDefault(a => a.AttributeType.Name == Constants.ObsoleteAttributeName);
+                    var isDeprecated = deprecatedAttr != null;
+                    var deprecatedComment = deprecatedAttr?.ConstructorArguments?.FirstOrDefault().Value as string;
+
+                    var dotNetType = default(Type);
+                    var canonicalType = default(Type);
+
+                    if (TypeBuilder.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
+                    {
+                        var dotNetTypeAttr = TypeUtils.GetCustomAttributesData(_type).FirstOrDefault(a =>
+                            a.AttributeType.Name == Constants.GenerateTypeScriptDotNetNameAttributeName &&
+                            a.ConstructorArguments.Count == 1
+                        );
+
+                        dotNetType = _type;
+                        if (dotNetTypeAttr?.ConstructorArguments[0].Value is Type t)
+                            dotNetType = t;
+
+                        canonicalType = TypeBuilder.GetCanonicalDotNetType(dotNetType);
+                    }
+
+                    var interfaceComments = GetInterfaceJsDocComment(indent, config, typeScriptClassComment, dotNetType, canonicalType, isDeprecated, deprecatedComment);
+                    if (interfaceComments != null)
+                        result.Append(interfaceComments);
                 }
-
-                var deprecatedAttr = TypeUtils.GetCustomAttributesData(_type).FirstOrDefault(a => a.AttributeType.Name == Constants.ObsoleteAttributeName);
-                var isDeprecated = deprecatedAttr != null;
-                var deprecatedComment = deprecatedAttr?.ConstructorArguments?.FirstOrDefault().Value as string;
-
-                var dotNetType = default(Type);
-                var canonicalType = default(Type);
-
-                if (TypeBuilder.ShouldGenerateDotNetTypeNamesAsJsDocComment(_type))
-                {
-                    var dotNetTypeAttr = TypeUtils.GetCustomAttributesData(_type).FirstOrDefault(a =>
-                        a.AttributeType.Name == Constants.GenerateTypeScriptDotNetNameAttributeName &&
-                        a.ConstructorArguments.Count == 1
-                    );
-
-                    dotNetType = _type;
-                    if (dotNetTypeAttr?.ConstructorArguments[0].Value is Type t)
-                        dotNetType = t;
-
-                    canonicalType = TypeBuilder.GetCanonicalDotNetType(dotNetType);
-                }
-
-                var interfaceComments = GetInterfaceJsDocComment(indent, config, typeScriptClassComment, dotNetType, canonicalType, isDeprecated, deprecatedComment);
-                if (interfaceComments != null)
-                    result.Append(interfaceComments);
 
                 result.Append($"{indent}interface {name}");
                 if (_typeParameters.Length > 0)
@@ -156,25 +159,28 @@ namespace TSTypeGen
                             optional = "?";
                     }
 
-                    var typeScriptMemberComment = generatorContext.GetTypeScriptComment(m.MemberInfo);
-                    if (typeScriptMemberComment == null)
+                    if (config.GenerateComments)
                     {
-                        var interfaceMembers = m.MemberInfo.DeclaringType.GetInterfaces().SelectMany(i => i.GetMember(m.MemberInfo.Name)).Where(m => m != null).ToList();
-                        foreach (var interfaceMember in interfaceMembers)
+                        var typeScriptMemberComment = generatorContext.GetTypeScriptComment(m.MemberInfo);
+                        if (typeScriptMemberComment == null)
                         {
-                            typeScriptMemberComment = generatorContext.GetTypeScriptComment(interfaceMember);
-                            if (typeScriptMemberComment != null)
-                                break;
+                            var interfaceMembers = m.MemberInfo.DeclaringType.GetInterfaces().SelectMany(i => i.GetMember(m.MemberInfo.Name)).Where(m => m != null).ToList();
+                            foreach (var interfaceMember in interfaceMembers)
+                            {
+                                typeScriptMemberComment = generatorContext.GetTypeScriptComment(interfaceMember);
+                                if (typeScriptMemberComment != null)
+                                    break;
+                            }
                         }
+
+                        var memberDeprecatedAttr = TypeUtils.GetCustomAttributesData(m.MemberInfo).FirstOrDefault(a => a.AttributeType.Name == Constants.ObsoleteAttributeName);
+                        var memberIsDeprecated = memberDeprecatedAttr != null;
+                        var memberDeprecatedComment = memberDeprecatedAttr?.ConstructorArguments?.FirstOrDefault().Value as string;
+
+                        var memberComments = GetMemberJsDocComment(indent, config, typeScriptMemberComment, memberIsDeprecated, memberDeprecatedComment);
+                        if (memberComments != null)
+                            result.Append(memberComments);
                     }
-
-                    var memberDeprecatedAttr = TypeUtils.GetCustomAttributesData(m.MemberInfo).FirstOrDefault(a => a.AttributeType.Name == Constants.ObsoleteAttributeName);
-                    var memberIsDeprecated = memberDeprecatedAttr != null;
-                    var memberDeprecatedComment = memberDeprecatedAttr?.ConstructorArguments?.FirstOrDefault().Value as string;
-
-                    var memberComments = GetMemberJsDocComment(indent, config, typeScriptMemberComment, memberIsDeprecated, memberDeprecatedComment);
-                    if (memberComments != null)
-                        result.Append(memberComments);
 
                     result.Append($"{indent}  {FixName(m.Name)}{optional}: {WrapType(m.Type.GetSource(), memberTypeWrapper)};");
                     result.Append(config.NewLine);
@@ -195,7 +201,7 @@ namespace TSTypeGen
 
             private string WrapType(string name, string memberTypeWrapper)
             {
-               return string.IsNullOrEmpty(memberTypeWrapper) ? name : $"{memberTypeWrapper}<{name}>";
+                return string.IsNullOrEmpty(memberTypeWrapper) ? name : $"{memberTypeWrapper}<{name}>";
             }
 
             private static readonly Regex ValidIdentifierRegex = new Regex("^[a-zA-Z_][a-zA-Z_0-9]*$");
