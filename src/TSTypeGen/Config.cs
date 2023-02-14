@@ -27,6 +27,7 @@ namespace TSTypeGen
         public bool UseEmbeddedDeclarations { get; set; }
         public bool UseConstEnums { get; set; } = true;
         public bool GenerateComments { get; set; } = true;
+        public bool GenerateInterfaceProperties { get; set; } = true;
 
         public static Config ReadFromFile(string path)
         {

@@ -548,14 +548,17 @@ namespace TSTypeGen
                     extends = new List<Type> { type.BaseType };
                 }
 
-                foreach (var iface in type.GetInterfaces())
+                if (config.GenerateInterfaceProperties)
                 {
-                    // We look for default interface properties because we don't generate an extends clause for C# interfaces
-                    // but that means we loose default interface properties. If any of the types interface has default properties
-                    // we include it in the extends clause.
-                    var defaultInterfaceProperties = TypeUtils.GetRelevantProperties(iface).Where(p => p.GetGetMethod()?.IsAbstract == false);
+                    foreach (var iface in type.GetInterfaces())
+                    {
+                        // We look for default interface properties because we don't generate an extends clause for C# interfaces
+                        // but that means we loose default interface properties. If any of the types interface has default properties
+                        // we include it in the extends clause.
+                        var defaultInterfaceProperties = TypeUtils.GetRelevantProperties(iface).Where(p => p.GetGetMethod()?.IsAbstract == false);
 
-                    properties.AddRange(defaultInterfaceProperties);
+                        properties.AddRange(defaultInterfaceProperties);
+                    }
                 }
 
                 var parentToAugument = GetParentTypeToAugument(type);
