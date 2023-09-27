@@ -14,7 +14,7 @@ namespace TSTypeGen.Tests
         [Test]
         public async Task RunTestCase()
         {
-            var assemblyLocation = GetAssemblyLocation();
+            var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);;
 
             var config = new Config
             {
@@ -66,14 +66,6 @@ namespace TSTypeGen.Tests
 
                 Assert.AreEqual(testFixtureSource, generatedTestFixtureSource);
             }
-        }
-
-        private string GetAssemblyLocation()
-        {
-            var codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            var uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            return Path.GetDirectoryName(path);
         }
     }
 }

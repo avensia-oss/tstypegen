@@ -356,7 +356,7 @@ namespace TSTypeGen
                 }
                 else
                 {
-                    sb.Append("type ").Append(Name).Append(" = ");
+                    sb.Append(indent).Append("type ").Append(Name).Append(" = ");
                     if (_members.Length > 0)
                     {
                         sb.Append('\'').Append(StringUtils.ToCamelCase(_members[0])).Append('\'');

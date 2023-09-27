@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="5.0.0" />
     <PackageReference Include="Mono.Options" Version="6.6.0.161" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-    <PackageReference Include="Nuclear.Assemblies" Version="1.1.0" />
+    <PackageReference Include="Nuclear.Assemblies" Version="1.2.0" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="5.0.1" />
   </ItemGroup>
 
