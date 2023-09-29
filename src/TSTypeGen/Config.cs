@@ -28,6 +28,8 @@ namespace TSTypeGen
         public bool UseConstEnums { get; set; } = true;
         public bool GenerateComments { get; set; } = true;
         public bool GenerateInterfaceProperties { get; set; } = true;
+        public List<string> PackagesDirectories { get; set; }
+        public string TargetFrameworkVersion { get; set; }
 
         public static Config ReadFromFile(string path)
         {

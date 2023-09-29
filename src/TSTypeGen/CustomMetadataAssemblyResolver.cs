@@ -18,10 +18,10 @@ namespace TSTypeGen
 
         private readonly List<DirectoryInfo> _nugetCaches = null;
 
-        public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver)
+        public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver, ICollection<string> packagesDirectories)
         {
             _pathAssemblyResolver = pathAssemblyResolver;
-            _nugetCaches = GetCaches();
+            _nugetCaches = packagesDirectories?.Count > 0 ? packagesDirectories.Select(d => new DirectoryInfo(d)).ToList() : GetCaches();
         }
 
         public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName)

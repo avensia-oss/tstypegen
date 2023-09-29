@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Extensions.FileSystemGlobbing;
@@ -44,8 +45,50 @@ namespace TSTypeGen
             return false;
         }
 
+        private List<string> GetRuntimeAssembliesForFrameworkVersion(string version)
+        {
+            var targetFrameworkMatch = Regex.Match(version, "^v([0-9]+)\\.([0-9]+)$");
+            if (!targetFrameworkMatch.Success)
+            {
+                Console.Error.WriteLine($"Invalid target framework. Expected v<x>.<y>, was {version}");
+                return null;
+            }
+            // This is fishy, but I can't find another way to locate all required framework assemblies.
+            var dotnetDirectory = Path.GetDirectoryName(RuntimeEnvironment.GetRuntimeDirectory().TrimEnd('\\'));
+            var aspnetDirectory = Path.Combine(Path.GetDirectoryName(dotnetDirectory), "Microsoft.AspNetCore.App");
+            var dotnetVersions = Directory.GetDirectories(dotnetDirectory).Select(Path.GetFileName);
+            var aspnetVersions = Directory.GetDirectories(aspnetDirectory).Select(Path.GetFileName);
+            var versionToUse = dotnetVersions.Intersect(aspnetVersions)
+                .Select(v => Regex.Match(v, "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"))
+                .Where(m => m.Success && m.Groups[1].Value == targetFrameworkMatch.Groups[1].Value && m.Groups[2].Value == targetFrameworkMatch.Groups[2].Value)
+                .MaxBy(m => int.Parse(m.Groups[3].Value))
+                ?.Value;
+
+            if (versionToUse == null)
+            {
+                Console.Error.WriteLine($"Unable to locate an Asp.net runtime compatible with framework {version}");
+                return null;
+            }
+
+            return Directory.GetFiles(Path.Combine(dotnetDirectory, versionToUse), "*.dll").Concat(Directory.GetFiles(Path.Combine(aspnetDirectory, versionToUse), "*.dll")).ToList();
+        }
+
         private bool LoadAllDlls()
         {
+            List<string> dllPaths;
+            if (!string.IsNullOrEmpty(_config.TargetFrameworkVersion))
+            {
+                dllPaths = GetRuntimeAssembliesForFrameworkVersion(_config.TargetFrameworkVersion);
+                if (dllPaths == null)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                dllPaths = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll").ToList();
+            }
+
             try
             {
                 var matcher = new Matcher();
@@ -59,7 +102,6 @@ namespace TSTypeGen
                 var result = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(_config.BasePath)));
 
                 var addedDlls = new List<string>();
-                var dllPaths = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll").ToList();
 
                 foreach (var dll in result.Files)
                 {
@@ -72,7 +114,7 @@ namespace TSTypeGen
                     }
                 }
 
-                var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths));
+                var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths), _config.PackagesDirectories);
                 var mlc = new MetadataLoadContext(resolver);
 
                 foreach (var dll in result.Files)
