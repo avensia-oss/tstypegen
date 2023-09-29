@@ -73,6 +73,57 @@ namespace TSTypeGen
             return Directory.GetFiles(Path.Combine(dotnetDirectory, versionToUse), "*.dll").Concat(Directory.GetFiles(Path.Combine(aspnetDirectory, versionToUse), "*.dll")).ToList();
         }
 
+        private ICollection<string> GetFilesMatchingPatterns(string basePath, ICollection<string> patterns)
+        {
+            var filesByName = new Dictionary<string, string>();
+            void TryAddFile(string path)
+            {
+                var name = Path.GetFileName(path);
+                if (filesByName.TryGetValue(name, out var existing))
+                {
+                    if (existing != path)
+                    {
+                        Console.WriteLine($"The file {name} was included from both paths {path} and {existing}, choosing {existing}");
+                        return;
+                    }
+                }
+                filesByName.Add(name, path);
+            }
+
+            foreach (var pattern in patterns)
+            {
+                if (pattern.Contains('*'))
+                {
+                    string matchBasePath, matchPattern;
+                    if (Path.IsPathRooted(pattern))
+                    {
+                        var parts = pattern.Split('\\', '/');
+                        var fixedParts = parts.TakeWhile(p => !p.Contains('*')).ToList();
+                        matchPattern = string.Join(Path.DirectorySeparatorChar, parts.Skip(fixedParts.Count));
+                        matchBasePath = string.Join(Path.DirectorySeparatorChar, fixedParts);
+                    }
+                    else
+                    {
+                        matchBasePath = basePath;
+                        matchPattern = pattern;
+                    }
+                    var matcher = new Matcher();
+                    matcher.AddInclude(matchPattern);
+                    foreach (var file in matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(matchBasePath))).Files)
+                    {
+                        var path = Path.Combine(matchBasePath, file.Path);
+                        TryAddFile(path);
+                    }
+                }
+                else
+                {
+                    var path = Path.IsPathRooted(pattern) ? pattern : Path.Combine(basePath, pattern);
+                    TryAddFile(path);
+                }
+            }
+            return filesByName.Values;
+        }
+
         private bool LoadAllDlls()
         {
             List<string> dllPaths;
@@ -91,25 +142,23 @@ namespace TSTypeGen
 
             try
             {
-                var matcher = new Matcher();
-                foreach (var pattern in _config.DllPatterns)
+                var patternPaths = GetFilesMatchingPatterns(_config.BasePath, _config.DllPatterns);
+                if (patternPaths == null)
                 {
-                    matcher.AddInclude(pattern.Trim());
+                    return false;
                 }
 
                 var loadedPaths = new List<string>();
                 var assemblies = new List<(Assembly Assembly, string XmlCommentsFile)>();
-                var result = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(_config.BasePath)));
 
                 var addedDlls = new List<string>();
 
-                foreach (var dll in result.Files)
+                foreach (var dll in patternPaths)
                 {
-                    var fullPath = Path.Join(_config.BasePath, dll.Path);
-                    var fileName = Path.GetFileName(fullPath);
+                    var fileName = Path.GetFileName(dll);
                     if (!addedDlls.Contains(fileName))
                     {
-                        dllPaths.Add(fullPath);
+                        dllPaths.Add(dll);
                         addedDlls.Add(fileName);
                     }
                 }
@@ -117,25 +166,24 @@ namespace TSTypeGen
                 var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths), _config.PackagesDirectories);
                 var mlc = new MetadataLoadContext(resolver);
 
-                foreach (var dll in result.Files)
+                foreach (var dll in patternPaths)
                 {
-                    if (!dll.Path.EndsWith(".dll"))
+                    if (!dll.EndsWith(".dll"))
                     {
-                        Console.WriteLine($"The file {dll.Path} matched the pattern but is not a dll, skipping");
+                        Console.WriteLine($"The file {dll} matched the pattern but is not a dll, skipping");
                     }
                     else
                     {
-                        var fullPath = Path.Join(_config.BasePath, dll.Path);
-                        if (loadedPaths.Contains(fullPath))
+                        if (loadedPaths.Contains(dll))
                             continue;
 
-                        loadedPaths.Add(fullPath);
+                        loadedPaths.Add(dll);
 
                         try
                         {
-                            var assembly = mlc.LoadFromAssemblyPath(fullPath);
+                            var assembly = mlc.LoadFromAssemblyPath(dll);
 
-                            var xmlCommentsFilePath = Path.ChangeExtension(fullPath, ".xml");
+                            var xmlCommentsFilePath = Path.ChangeExtension(dll, ".xml");
                             if (!File.Exists(xmlCommentsFilePath))
                             {
                                 xmlCommentsFilePath = null;
@@ -146,7 +194,7 @@ namespace TSTypeGen
                         }
                         catch (Exception)
                         {
-                            Console.WriteLine("Could not load dll file " + fullPath + ", skipping...");
+                            Console.WriteLine("Could not load dll file " + dll + ", skipping...");
                         }
                     }
                 }
