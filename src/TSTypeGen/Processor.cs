@@ -163,6 +163,20 @@ namespace TSTypeGen
                     }
                 }
 
+                // Locate all dlls that exist in a directory in which we have locaed a file to process. This allows generating types for a single file in the output directory
+                foreach (var directory in patternPaths.Select(Path.GetDirectoryName).Distinct())
+                {
+                    foreach (var dll in Directory.GetFiles(directory, "*.dll"))
+                    {
+                        var fileName = Path.GetFileName(dll);
+                        if (!addedDlls.Contains(fileName))
+                        {
+                            dllPaths.Add(dll);
+                            addedDlls.Add(fileName);
+                        }
+                    }
+                }
+
                 var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths), _config.PackagesDirectories);
                 var mlc = new MetadataLoadContext(resolver);
 
