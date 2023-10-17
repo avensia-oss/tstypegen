@@ -54,7 +54,7 @@ namespace TSTypeGen
                 return null;
             }
             // This is fishy, but I can't find another way to locate all required framework assemblies.
-            var dotnetDirectory = Path.GetDirectoryName(RuntimeEnvironment.GetRuntimeDirectory().TrimEnd('\\'));
+            var dotnetDirectory = Path.GetDirectoryName(RuntimeEnvironment.GetRuntimeDirectory().TrimEnd('\\', '/'));
             var aspnetDirectory = Path.Combine(Path.GetDirectoryName(dotnetDirectory), "Microsoft.AspNetCore.App");
             var dotnetVersions = Directory.GetDirectories(dotnetDirectory).Select(Path.GetFileName);
             var aspnetVersions = Directory.GetDirectories(aspnetDirectory).Select(Path.GetFileName);
