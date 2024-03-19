@@ -1,5 +1,6 @@
 ﻿using Mono.Options;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -38,12 +39,18 @@ namespace TSTypeGen
         static int Main(string[] args)
         {
             string configPath = null;
+            string[] packagesDirectories = null;
+            string[] dllPatterns = null;
+            string frameworkVersion = null;
             bool showHelp = false, verifyOnly = false;
 
             var options = new OptionSet
             {
                 { "v|verify", "Verify that the generated types are as expected, and return a non-zero exit code if they do not match. Nothing will be updated in this mode.", _ => verifyOnly = true },
                 { "c|cfg=", "Specify a file that contains configuration", s => configPath = s },
+                { "p|packages=", "Specify directory where NuGet packages are stored", s => packagesDirectories = s.Split(";") },
+                { "f|framework=", "Specify the framework version (eg. v7.0)", s => frameworkVersion = s },
+                { "d|dllpatterns=", "Specify dll patterns on the command line instead of in the config file. Separate patterns with , or ;", s => dllPatterns = s.Split(',', ';') },
                 { "h|?|help", "Show this message and exit", _ => showHelp = true },
             };
 
@@ -73,6 +80,32 @@ namespace TSTypeGen
             if (config == null)
             {
                 return 1;
+            }
+
+            if (packagesDirectories != null && packagesDirectories.Length > 0)
+            {
+                config.PackagesDirectories ??= new List<string>();
+                foreach (var d in packagesDirectories)
+                {
+                    if (!config.PackagesDirectories.Contains(d))
+                    {
+                        config.PackagesDirectories.Add(d);
+                    }
+                }
+            }
+            if (dllPatterns?.Length > 0)
+            {
+                if (config.DllPatterns?.Count > 0)
+                {
+                    Console.Error.WriteLine("Cannot specify dll patterns both in the config file and on the command line");
+                    return 1;
+                }
+                config.DllPatterns = dllPatterns.ToList();
+            }
+
+            if (frameworkVersion != null)
+            {
+                config.TargetFrameworkVersion = frameworkVersion;
             }
 
             var processor = new Processor(config);

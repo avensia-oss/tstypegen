@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Extensions.FileSystemGlobbing;
@@ -44,56 +45,159 @@ namespace TSTypeGen
             return false;
         }
 
+        private List<string> GetRuntimeAssembliesForFrameworkVersion(string version)
+        {
+            var targetFrameworkMatch = Regex.Match(version, "^v([0-9]+)\\.([0-9]+)$");
+            if (!targetFrameworkMatch.Success)
+            {
+                Console.Error.WriteLine($"Invalid target framework. Expected v<x>.<y>, was {version}");
+                return null;
+            }
+            // This is fishy, but I can't find another way to locate all required framework assemblies.
+            var dotnetDirectory = Path.GetDirectoryName(RuntimeEnvironment.GetRuntimeDirectory().TrimEnd('\\', '/'));
+            var aspnetDirectory = Path.Combine(Path.GetDirectoryName(dotnetDirectory), "Microsoft.AspNetCore.App");
+            var dotnetVersions = Directory.GetDirectories(dotnetDirectory).Select(Path.GetFileName);
+            var aspnetVersions = Directory.GetDirectories(aspnetDirectory).Select(Path.GetFileName);
+            var versionToUse = dotnetVersions.Intersect(aspnetVersions)
+                .Select(v => Regex.Match(v, "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"))
+                .Where(m => m.Success && m.Groups[1].Value == targetFrameworkMatch.Groups[1].Value && m.Groups[2].Value == targetFrameworkMatch.Groups[2].Value)
+                .MaxBy(m => int.Parse(m.Groups[3].Value))
+                ?.Value;
+
+            if (versionToUse == null)
+            {
+                Console.Error.WriteLine($"Unable to locate an Asp.net runtime compatible with framework {version}");
+                return null;
+            }
+
+            return Directory.GetFiles(Path.Combine(dotnetDirectory, versionToUse), "*.dll").Concat(Directory.GetFiles(Path.Combine(aspnetDirectory, versionToUse), "*.dll")).ToList();
+        }
+
+        private ICollection<string> GetFilesMatchingPatterns(string basePath, ICollection<string> patterns)
+        {
+            var filesByName = new Dictionary<string, string>();
+            void TryAddFile(string path)
+            {
+                var name = Path.GetFileName(path);
+                if (filesByName.TryGetValue(name, out var existing))
+                {
+                    if (existing != path)
+                    {
+                        Console.WriteLine($"The file {name} was included from both paths {path} and {existing}, choosing {existing}");
+                        return;
+                    }
+                }
+                filesByName.Add(name, path);
+            }
+
+            foreach (var pattern in patterns)
+            {
+                if (pattern.Contains('*'))
+                {
+                    string matchBasePath, matchPattern;
+                    if (Path.IsPathRooted(pattern))
+                    {
+                        var parts = pattern.Split('\\', '/');
+                        var fixedParts = parts.TakeWhile(p => !p.Contains('*')).ToList();
+                        matchPattern = string.Join(Path.DirectorySeparatorChar, parts.Skip(fixedParts.Count));
+                        matchBasePath = string.Join(Path.DirectorySeparatorChar, fixedParts);
+                    }
+                    else
+                    {
+                        matchBasePath = basePath;
+                        matchPattern = pattern;
+                    }
+                    var matcher = new Matcher();
+                    matcher.AddInclude(matchPattern);
+                    foreach (var file in matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(matchBasePath))).Files)
+                    {
+                        var path = Path.Combine(matchBasePath, file.Path);
+                        TryAddFile(path);
+                    }
+                }
+                else
+                {
+                    var path = Path.IsPathRooted(pattern) ? pattern : Path.Combine(basePath, pattern);
+                    TryAddFile(path);
+                }
+            }
+            return filesByName.Values;
+        }
+
         private bool LoadAllDlls()
         {
+            List<string> dllPaths;
+            if (!string.IsNullOrEmpty(_config.TargetFrameworkVersion))
+            {
+                dllPaths = GetRuntimeAssembliesForFrameworkVersion(_config.TargetFrameworkVersion);
+                if (dllPaths == null)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                dllPaths = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll").ToList();
+            }
+
             try
             {
-                var matcher = new Matcher();
-                foreach (var pattern in _config.DllPatterns)
+                var patternPaths = GetFilesMatchingPatterns(_config.BasePath, _config.DllPatterns);
+                if (patternPaths == null)
                 {
-                    matcher.AddInclude(pattern.Trim());
+                    return false;
                 }
 
                 var loadedPaths = new List<string>();
                 var assemblies = new List<(Assembly Assembly, string XmlCommentsFile)>();
-                var result = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(_config.BasePath)));
 
                 var addedDlls = new List<string>();
-                var dllPaths = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll").ToList();
 
-                foreach (var dll in result.Files)
+                foreach (var dll in patternPaths)
                 {
-                    var fullPath = Path.Join(_config.BasePath, dll.Path);
-                    var fileName = Path.GetFileName(fullPath);
+                    var fileName = Path.GetFileName(dll);
                     if (!addedDlls.Contains(fileName))
                     {
-                        dllPaths.Add(fullPath);
+                        dllPaths.Add(dll);
                         addedDlls.Add(fileName);
                     }
                 }
 
-                var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths));
+                // Locate all dlls that exist in a directory in which we have locaed a file to process. This allows generating types for a single file in the output directory
+                foreach (var directory in patternPaths.Select(Path.GetDirectoryName).Distinct())
+                {
+                    foreach (var dll in Directory.GetFiles(directory, "*.dll"))
+                    {
+                        var fileName = Path.GetFileName(dll);
+                        if (!addedDlls.Contains(fileName))
+                        {
+                            dllPaths.Add(dll);
+                            addedDlls.Add(fileName);
+                        }
+                    }
+                }
+
+                var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths), _config.PackagesDirectories);
                 var mlc = new MetadataLoadContext(resolver);
 
-                foreach (var dll in result.Files)
+                foreach (var dll in patternPaths)
                 {
-                    if (!dll.Path.EndsWith(".dll"))
+                    if (!dll.EndsWith(".dll"))
                     {
-                        Console.WriteLine($"The file {dll.Path} matched the pattern but is not a dll, skipping");
+                        Console.WriteLine($"The file {dll} matched the pattern but is not a dll, skipping");
                     }
                     else
                     {
-                        var fullPath = Path.Join(_config.BasePath, dll.Path);
-                        if (loadedPaths.Contains(fullPath))
+                        if (loadedPaths.Contains(dll))
                             continue;
 
-                        loadedPaths.Add(fullPath);
+                        loadedPaths.Add(dll);
 
                         try
                         {
-                            var assembly = mlc.LoadFromAssemblyPath(fullPath);
+                            var assembly = mlc.LoadFromAssemblyPath(dll);
 
-                            var xmlCommentsFilePath = Path.ChangeExtension(fullPath, ".xml");
+                            var xmlCommentsFilePath = Path.ChangeExtension(dll, ".xml");
                             if (!File.Exists(xmlCommentsFilePath))
                             {
                                 xmlCommentsFilePath = null;
@@ -104,7 +208,7 @@ namespace TSTypeGen
                         }
                         catch (Exception)
                         {
-                            Console.WriteLine("Could not load dll file " + fullPath + ", skipping...");
+                            Console.WriteLine("Could not load dll file " + dll + ", skipping...");
                         }
                     }
                 }

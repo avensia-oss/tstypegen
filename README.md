@@ -18,6 +18,9 @@ Options:
 
 - `-c`: Specify the configuration file (see below for format)
 - `-verify`: Do not update any definitions but instead return an error if any files need updates. This can be used on a CI server to detect if all types have been built and checked in.
+- `p`: Specify directories containing NuGet caches. If invoking the tool from a .targets file, specify "-p &quot;$(NuGetPackageFolders)\&quot; (Note the final backslash that is required because the MSBuild variable ends with a backslash, and if we don't have 2, the quote will be escaped which is bad)
+- `f`: Specify target framework version. If invoking the tool from a .targets file, specify "-f $(TargetFrameworkVersion)"
+- `d`: Specify dllPatterns on the command line instead of in the config. Separate patterns with , or ;
 
 In order to generate a file, the minimum you need to do is define a C# attribute called `GenerateTypeScriptDefinitionAttribute`, like this:
 
