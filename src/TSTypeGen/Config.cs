@@ -1,13 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json;
 
 namespace TSTypeGen
 {
     public class Config
     {
+        private static JsonSerializerOptions PrettySerializerOptions = new ()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        };
+
         public string NewLine { get; set; } = Environment.NewLine;
         public string BasePath { get; set; }
         public string OutputPath { get; set; }
@@ -33,7 +38,7 @@ namespace TSTypeGen
 
         public static Config ReadFromFile(string path)
         {
-            var result = JsonConvert.DeserializeObject<Config>(File.ReadAllText(path), new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
+            var result = JsonSerializer.Deserialize<Config>(File.ReadAllText(path), PrettySerializerOptions);
             if (string.IsNullOrEmpty(result.BasePath))
             {
                 result.BasePath = Path.GetDirectoryName(path);
