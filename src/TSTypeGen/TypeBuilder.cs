@@ -448,7 +448,7 @@ namespace TSTypeGen
         {
             bool DoShouldGenerateDotNetTypeNamesAsJsDocComment(object typeOrAssembly)
             {
-                var customAttributes = typeOrAssembly is Type type ? TypeUtils.GetCustomAttributesData(type) : TypeUtils.GetAssemblyCustomAttributesData((Assembly) typeOrAssembly);
+                var customAttributes = typeOrAssembly is Type type ? TypeUtils.GetCustomAttributesData(type) : TypeUtils.GetAssemblyCustomAttributesData((Assembly)typeOrAssembly);
                 var attr = customAttributes.FirstOrDefault(a => a.AttributeType.Name == Constants.GenerateDotNetTypeNamesAsJsDocCommentAttributeName);
                 return attr != null;
             }
@@ -520,11 +520,20 @@ namespace TSTypeGen
             return GetWrapperType(type);
         }
 
-        public static async Task<TsTypeDefinition> BuildTsTypeDefinitionAsync(Type type, TypeBuilderConfig config, GeneratorContext generatorContext)
+        public static async Task<TsTypeDefinition> BuildTsTypeDefinitionAsync(Type type, TypeBuilderConfig config, GeneratorContext generatorContext, bool asConstOnly = false)
         {
             var tsNamespace = GetTypescriptNamespace(type);
 
-            if (type.IsEnum)
+            if (asConstOnly)
+            {
+                if (type.IsEnum)
+                {
+                    var members = Enum.GetNames(type);
+                    return TsTypeDefinition.Const(type.Name, members);
+                }
+                return null;
+            }
+            else if (type.IsEnum)
             {
                 var members = Enum.GetNames(type);
                 return TsTypeDefinition.Enum(type.Name, members);

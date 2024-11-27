@@ -268,9 +268,14 @@ namespace TSTypeGen
             return Path.Combine(_config.OutputPath, namespaceName + ".d.ts");
         }
 
-        private List<GeneratedNamespaceFile> GetFilesToGenerate()
+        private string GetConstGeneratedNamespaceFilePath(string namespaceName)
         {
-            var result = new List<GeneratedNamespaceFile>();
+            return Path.Combine(_config.OutputPath, namespaceName + ".const.ts");
+        }
+
+        private List<IGeneratedFile> GetFilesToGenerate()
+        {
+            var result = new List<IGeneratedFile>();
             var typesPerNamespace = new Dictionary<string, List<Type>>();
             foreach (var asm in _generatorContext.Assemblies)
             {
@@ -287,6 +292,7 @@ namespace TSTypeGen
             foreach (var (ns, types) in typesPerNamespace)
             {
                 result.Add(new GeneratedNamespaceFile(GetGeneratedNamespaceFilePath(ns), ns, ImmutableList.CreateRange(types)));
+                result.Add(new GeneratedConstFile(GetConstGeneratedNamespaceFilePath(ns), ns, ImmutableList.CreateRange(types)));
             }
 
             return result;

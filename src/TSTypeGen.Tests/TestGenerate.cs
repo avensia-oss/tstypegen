@@ -14,7 +14,7 @@ namespace TSTypeGen.Tests
         [Test]
         public async Task RunTestCase()
         {
-            var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);;
+            var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location); ;
 
             var config = new Config
             {
@@ -28,12 +28,12 @@ namespace TSTypeGen.Tests
 
             var processor = new Processor(config);
 
-            var oldGeneratedFiles = Directory.GetFiles(assemblyLocation, "*.d.ts");
+            var oldGeneratedFiles = Directory.GetFiles(assemblyLocation, "*.ts");
             foreach (var oldGeneratedFile in oldGeneratedFiles)
                 File.Delete(oldGeneratedFile);
 
             await processor.UpdateTypesAsync();
-            var generatedFiles = Directory.GetFiles(assemblyLocation, "*.d.ts");
+            var generatedFiles = Directory.GetFiles(assemblyLocation, "*.ts");
 
             var testFixturesPath = assemblyLocation;
             var n = 0;
@@ -54,7 +54,7 @@ namespace TSTypeGen.Tests
                     throw new InvalidOperationException("Could not find the TestFixtures folder");
             }
 
-            var testFixtures = Directory.GetFiles(testFixturesPath, "*.d.ts");
+            var testFixtures = Directory.GetFiles(testFixturesPath, "*.ts");
             foreach (var testFixture in testFixtures)
             {
                 var generatedTestFixture = generatedFiles.FirstOrDefault(g => Path.GetFileName(g) == Path.GetFileName(testFixture));

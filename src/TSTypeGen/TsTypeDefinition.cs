@@ -38,6 +38,11 @@ namespace TSTypeGen
             return new EnumType(name, members);
         }
 
+        public static TsTypeDefinition Const(string name, IEnumerable<string> members)
+        {
+            return new ConstType(name, members);
+        }
+
         private class InterfaceType : TsTypeDefinition
         {
             private readonly ImmutableArray<TsInterfaceMember> _members;
@@ -371,6 +376,34 @@ namespace TSTypeGen
                     }
                     sb.AppendLine(";");
                 }
+                return sb.ToString();
+            }
+        }
+
+        private class ConstType : TsTypeDefinition
+        {
+            private readonly ImmutableArray<string> _members;
+
+            public ConstType(string name, IEnumerable<string> members) : base(name)
+            {
+                _members = ImmutableArray.CreateRange(members);
+            }
+
+            public override string GetSource(string outputFilePath, Config config, GeneratorContext generatorContext)
+            {
+                var sb = new StringBuilder();
+                var indent = "  ";
+
+                sb.Append($"{indent}{Name}: {{");
+                sb.Append(config.NewLine);
+                foreach (var member in _members)
+                {
+                    sb.Append($"{indent}  {member}: \"{StringUtils.ToCamelCase(member)}\",");
+                    sb.Append(config.NewLine);
+                }
+                sb.Append($"{indent}}},");
+                sb.Append(config.NewLine);
+
                 return sb.ToString();
             }
         }

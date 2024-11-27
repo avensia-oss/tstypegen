@@ -9,13 +9,13 @@ using Microsoft.CodeAnalysis;
 
 namespace TSTypeGen
 {
-    public class GeneratedNamespaceFile : IGeneratedFile
+    public class GeneratedConstFile : IGeneratedFile
     {
         public string FilePath { get; }
         private readonly string _namespaceName;
         private readonly ImmutableList<Type> _types;
 
-        public GeneratedNamespaceFile(string filePath, string namespaceName, ImmutableList<Type> types)
+        public GeneratedConstFile(string filePath, string namespaceName, ImmutableList<Type> types)
         {
             FilePath = filePath;
             _namespaceName = namespaceName;
@@ -29,16 +29,19 @@ namespace TSTypeGen
             var innerSource = new StringBuilder();
             foreach (var t in _types.OrderBy(t => t.Name, StringComparer.InvariantCulture).ThenBy(t => t.FullName, StringComparer.InvariantCulture))
             {
-                if (!first)
+                var tsTypeDefinition = await TypeBuilder.BuildTsTypeDefinitionAsync(t, typeBuilderConfig, generatorContext, true);
+                if (tsTypeDefinition != null)
                 {
-                    innerSource.Append(config.NewLine);
+                    if (first)
+                    {
+                        innerSource.Append(config.NewLine);
+                    }
+                    innerSource.Append(tsTypeDefinition.GetSource(FilePath, config, generatorContext));
+                    first = false;
                 }
-                var tsTypeDefinition = await TypeBuilder.BuildTsTypeDefinitionAsync(t, typeBuilderConfig, generatorContext);
-                innerSource.Append(tsTypeDefinition.GetSource(FilePath, config, generatorContext));
-                first = false;
             }
 
-            return "declare namespace " + _namespaceName + " {" + config.NewLine + innerSource + "}" + config.NewLine;
+            return "export const " + _namespaceName + " = {" + innerSource + "} as const;" + config.NewLine;
         }
 
         public async Task ApplyAsync(TypeBuilderConfig typeBuilderConfig, Config config, GeneratorContext generatorContext)
