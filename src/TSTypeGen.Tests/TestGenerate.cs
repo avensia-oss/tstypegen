@@ -64,7 +64,7 @@ namespace TSTypeGen.Tests
                 var testFixtureSource = await File.ReadAllTextAsync(testFixture);
                 var generatedTestFixtureSource = await File.ReadAllTextAsync(generatedTestFixture);
 
-                Assert.AreEqual(testFixtureSource, generatedTestFixtureSource);
+                Assert.That(testFixtureSource, Is.EqualTo(generatedTestFixtureSource), message: testFixture);
             }
         }
     }

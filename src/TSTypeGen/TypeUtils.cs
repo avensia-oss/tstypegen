@@ -62,10 +62,14 @@ namespace TSTypeGen
 
         public static List<PropertyInfo> GetRelevantProperties(Type type)
         {
-            return type
-                .GetProperties(BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                .Where(p => p.GetIndexParameters().Length == 0)
+            var props = type
+              .GetProperties(BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.DeclaredOnly);
+         
+            var indexParams =
+                props.Where(p => p.GetIndexParameters().Length == 0)
                 .ToList();
+
+            return indexParams;
         }
 
         public static List<FieldInfo> GetRelevantFields(Type type)
@@ -78,10 +82,9 @@ namespace TSTypeGen
 
         public static List<PropertyInfo> GetRelevantAndBaseProperties(Type type)
         {
-            return type
-                .GetProperties(BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public)
-                .Where(p => p.GetIndexParameters().Length == 0)
-                .ToList();
+            var props = type.GetProperties(BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.Public);
+            var indexParams = props.Where(p => p.GetIndexParameters().Length == 0).ToList();
+            return indexParams;
         }
 
         public static List<CustomAttributeData> GetCustomAttributesData(Type type)

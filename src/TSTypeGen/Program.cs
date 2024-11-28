@@ -1,136 +1,132 @@
 ﻿using Mono.Options;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace TSTypeGen
+namespace TSTypeGen;
+
+public class Program
 {
-    public class Program
+    public static void WriteError(string message)
     {
-        public static void WriteError(string message)
+        var oldColor = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Error.WriteLine(message);
+        Console.ForegroundColor = oldColor;
+    }
+
+    static int MainTask(Task<bool> task)
+    {
+        try
         {
-            var oldColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Error.WriteLine(message);
-            Console.ForegroundColor = oldColor;
+            return task.Result ? 0 : 1;
+        }
+        catch (AggregateException ex)
+        {
+            WriteError(ex.InnerException.Message);
+            return 1;
+        }
+        catch (Exception ex)
+        {
+            WriteError(ex.Message);
+            return 1;
+        }
+    }
+
+    static int Main(string[] args)
+    {
+        string configPath = null;
+        string[] packagesDirectories = null;
+        string[] dllPatterns = null;
+        string frameworkVersion = null;
+        bool showHelp = false, verifyOnly = false;
+
+        var options = new OptionSet
+        {
+            { "v|verify", "Verify that the generated types are as expected, and return a non-zero exit code if they do not match. Nothing will be updated in this mode.", _ => verifyOnly = true },
+            { "c|cfg=", "Specify a file that contains configuration", s => configPath = s },
+            { "p|packages=", "Specify directory where NuGet packages are stored", s => packagesDirectories = s.Split(";") },
+            { "f|framework=", "Specify the framework version (eg. v7.0)", s => frameworkVersion = s },
+            { "d|dllpatterns=", "Specify dll patterns on the command line instead of in the config file. Separate patterns with , or ;", s => dllPatterns = s.Split(',', ';') },
+            { "h|?|help", "Show this message and exit", _ => showHelp = true },
+        };
+
+        options.Parse(args);
+
+        if (showHelp || args.Length == 0)
+        {
+            Console.WriteLine("Updates TypeScript type definitions based on project conventions.");
+            Console.WriteLine("Options:");
+            options.WriteOptionDescriptions(Console.Out);
+            return 0;
         }
 
-        static int MainTask(Task<bool> task)
+        if (string.IsNullOrEmpty(configPath))
         {
-            try
-            {
-                return task.Result ? 0 : 1;
-            }
-            catch (AggregateException ex)
-            {
-                WriteError(ex.InnerException.Message);
-                return 1;
-            }
-            catch (Exception ex)
-            {
-                WriteError(ex.Message);
-                return 1;
-            }
+            Console.Error.WriteLine("Missing config file (-cfg option).");
+            return 1;
         }
 
-        static int Main(string[] args)
+        if (!File.Exists(configPath))
         {
-            string configPath = null;
-            string[] packagesDirectories = null;
-            string[] dllPatterns = null;
-            string frameworkVersion = null;
-            bool showHelp = false, verifyOnly = false;
+            Console.Error.WriteLine($"Config file {configPath} does not exist.");
+            return 1;
+        }
 
-            var options = new OptionSet
+        var config = ReadConfig(configPath);
+        if (config == null)
+        {
+            return 1;
+        }
+
+        if (packagesDirectories != null && packagesDirectories.Length > 0)
+        {
+            config.PackagesDirectories ??= [];
+            foreach (var d in packagesDirectories)
             {
-                { "v|verify", "Verify that the generated types are as expected, and return a non-zero exit code if they do not match. Nothing will be updated in this mode.", _ => verifyOnly = true },
-                { "c|cfg=", "Specify a file that contains configuration", s => configPath = s },
-                { "p|packages=", "Specify directory where NuGet packages are stored", s => packagesDirectories = s.Split(";") },
-                { "f|framework=", "Specify the framework version (eg. v7.0)", s => frameworkVersion = s },
-                { "d|dllpatterns=", "Specify dll patterns on the command line instead of in the config file. Separate patterns with , or ;", s => dllPatterns = s.Split(',', ';') },
-                { "h|?|help", "Show this message and exit", _ => showHelp = true },
-            };
-
-            options.Parse(args);
-
-            if (showHelp || args.Length == 0)
-            {
-                Console.WriteLine("Updates TypeScript type definitions based on project conventions.");
-                Console.WriteLine("Options:");
-                options.WriteOptionDescriptions(Console.Out);
-                return 0;
-            }
-
-            if (string.IsNullOrEmpty(configPath))
-            {
-                Console.Error.WriteLine("Missing config file (-cfg option).");
-                return 1;
-            }
-
-            if (!File.Exists(configPath))
-            {
-                Console.Error.WriteLine($"Config file {configPath} does not exist.");
-                return 1;
-            }
-
-            var config = ReadConfig(configPath);
-            if (config == null)
-            {
-                return 1;
-            }
-
-            if (packagesDirectories != null && packagesDirectories.Length > 0)
-            {
-                config.PackagesDirectories ??= new List<string>();
-                foreach (var d in packagesDirectories)
+                if (!config.PackagesDirectories.Contains(d))
                 {
-                    if (!config.PackagesDirectories.Contains(d))
-                    {
-                        config.PackagesDirectories.Add(d);
-                    }
+                    config.PackagesDirectories.Add(d);
                 }
             }
-            if (dllPatterns?.Length > 0)
+        }
+        if (dllPatterns?.Length > 0)
+        {
+            if (config.DllPatterns?.Count > 0)
             {
-                if (config.DllPatterns?.Count > 0)
-                {
-                    Console.Error.WriteLine("Cannot specify dll patterns both in the config file and on the command line");
-                    return 1;
-                }
-                config.DllPatterns = dllPatterns.ToList();
+                Console.Error.WriteLine("Cannot specify dll patterns both in the config file and on the command line");
+                return 1;
             }
-
-            if (frameworkVersion != null)
-            {
-                config.TargetFrameworkVersion = frameworkVersion;
-            }
-
-            var processor = new Processor(config);
-
-            if (verifyOnly)
-            {
-                return MainTask(processor.VerifyTypesAsync());
-            }
-            else
-            {
-                return MainTask(processor.UpdateTypesAsync());
-            }
+            config.DllPatterns = [.. dllPatterns];
         }
 
-        private static Config ReadConfig(string configPath)
+        if (frameworkVersion != null)
         {
-            try
-            {
-                return Config.ReadFromFile(configPath);
-            }
-            catch (Exception ex)
-            {
-                WriteError($"Error reading config file {configPath}: {ex.Message}.");
-                return null;
-            }
+            config.TargetFrameworkVersion = frameworkVersion;
+        }
+
+        var processor = new Processor(config);
+
+        if (verifyOnly)
+        {
+            return MainTask(processor.VerifyTypesAsync());
+        }
+        else
+        {
+            return MainTask(processor.UpdateTypesAsync());
+        }
+    }
+
+    private static Config ReadConfig(string configPath)
+    {
+        try
+        {
+            return Config.ReadFromFile(configPath);
+        }
+        catch (Exception ex)
+        {
+            WriteError($"Error reading config file {configPath}: {ex.Message}.");
+            return null;
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace TSTypeGen
 {
@@ -29,10 +28,9 @@ namespace TSTypeGen
 
         public List<string> GetTypeScriptComment(Type type)
         {
-            if (!AssemblyComments.ContainsKey(type.Assembly))
-                return null;
+            if (!AssemblyComments.TryGetValue(type.Assembly, out var value)) return null;
 
-            return AssemblyComments[type.Assembly].GetTypeScriptComment(type);
+            return value.GetTypeScriptComment(type);
         }
 
         public List<string> GetTypeScriptComment(MemberInfo memberInfo)
