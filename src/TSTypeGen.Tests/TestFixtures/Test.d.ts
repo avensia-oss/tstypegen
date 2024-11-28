@@ -422,6 +422,22 @@ declare namespace Test {
     prop13: boolean;
   }
 
+  interface TestRecord1 {
+    prop1: number;
+  }
+
+  interface TestRecord2 {
+    prop1: TestRecord1;
+  }
+
+  interface TestRecordInheritance extends TestRecordInheritanceBase {
+    prop2: string;
+  }
+
+  interface TestRecordInheritanceBase {
+    prop1: number;
+  }
+
   interface TestStruct1 {
     prop1: number;
   }
