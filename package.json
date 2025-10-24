@@ -1,6 +1,6 @@
 {
   "name": "@avensia-oss/tstypegen",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "A tool to generate TypeScript types from C# types",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
@@ -31,5 +31,6 @@
     "build": "tsc && dotnet publish src/TSTypeGen/TSTypeGen.csproj -o ./bin",
     "test": "dotnet test src/TSTypeGen.Tests/TSTypeGen.Tests.csproj",
     "prepublishOnly": "npm run test && npm run build"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
