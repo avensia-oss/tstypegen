@@ -26,6 +26,7 @@ namespace TSTypeGen
         public bool WrapConstEnumsInTemplateStrings { get; set; }
         public bool UseEmbeddedDeclarations { get; set; }
         public bool UseConstEnums { get; set; } = true;
+        public bool GenerateEnumFiles { get; set; }
         public bool GenerateComments { get; set; } = true;
         public bool GenerateInterfaceProperties { get; set; } = true;
         public List<string> PackagesDirectories { get; set; }
