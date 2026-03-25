@@ -32,8 +32,13 @@ namespace TSTypeGen.Tests
             foreach (var oldGeneratedFile in oldGeneratedFiles)
                 File.Delete(oldGeneratedFile);
 
+            var oldGeneratedTsFiles = Directory.GetFiles(assemblyLocation, "*.ts");
+            foreach (var oldGeneratedTsFile in oldGeneratedTsFiles)
+                File.Delete(oldGeneratedTsFile);
+
             await processor.UpdateTypesAsync();
             var generatedFiles = Directory.GetFiles(assemblyLocation, "*.d.ts");
+            generatedFiles = generatedFiles.Concat(Directory.GetFiles(assemblyLocation, "*.ts")).ToArray();
 
             var testFixturesPath = assemblyLocation;
             var n = 0;
@@ -54,7 +59,7 @@ namespace TSTypeGen.Tests
                     throw new InvalidOperationException("Could not find the TestFixtures folder");
             }
 
-            var testFixtures = Directory.GetFiles(testFixturesPath, "*.d.ts");
+            var testFixtures = Directory.GetFiles(testFixturesPath, "*.d.ts").Concat(Directory.GetFiles(testFixturesPath, "*.ts")).ToArray();
             foreach (var testFixture in testFixtures)
             {
                 var generatedTestFixture = generatedFiles.FirstOrDefault(g => Path.GetFileName(g) == Path.GetFileName(testFixture));
