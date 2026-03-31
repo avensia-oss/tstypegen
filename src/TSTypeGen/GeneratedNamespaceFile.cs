@@ -411,7 +411,7 @@ namespace TSTypeGen
             return result.ToString();
         }
 
-        private static string BuildTypeNamesJsonSource(string declarationFileContent)
+        private string BuildTypeNamesJsonSource(string declarationFileContent)
         {
             var (typeNameEntries, _) = GetDotNetTypeNameEntries(declarationFileContent);
 
@@ -423,11 +423,11 @@ namespace TSTypeGen
 
             foreach (var entry in typeNameEntries)
             {
-                var key = entry.Value;
+                var key = _namespaceName + "." + entry.Key;
                 if (seenKeys.Contains(key))
                     continue;
                 seenKeys.Add(key);
-                dict[key] = key;
+                dict[key] = entry.Value;
             }
 
             return System.Text.Json.JsonSerializer.Serialize(dict, new System.Text.Json.JsonSerializerOptions
@@ -437,7 +437,7 @@ namespace TSTypeGen
             });
         }
 
-        private static string BuildCanonicalTypeNamesJsonSource(string declarationFileContent)
+        private string BuildCanonicalTypeNamesJsonSource(string declarationFileContent)
         {
             var (_, canonicalNameEntries) = GetDotNetTypeNameEntries(declarationFileContent);
 
@@ -449,7 +449,7 @@ namespace TSTypeGen
 
             foreach (var entry in canonicalNameEntries)
             {
-                var key = entry.Value;
+                var key = _namespaceName + "." + entry.Key;
                 if (seenKeys.Contains(key))
                     continue;
                 seenKeys.Add(key);
