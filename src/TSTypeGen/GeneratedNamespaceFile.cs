@@ -57,7 +57,6 @@ namespace TSTypeGen
             await ApplyCompanionFileAsync(GetConstsFilePath(), BuildConstsSource(newContent, config.NewLine));
             await ApplyCompanionFileAsync(GetTypeNamesFilePath(), BuildTypeNamesSource(newContent, config.NewLine));
             await ApplyCompanionFileAsync(GetTypeNamesJsonFilePath(), BuildTypeNamesJsonSource(newContent));
-            await ApplyCompanionFileAsync(GetCanonicalTypeNamesJsonFilePath(), BuildCanonicalTypeNamesJsonSource(newContent));
             await ApplyCompanionFileAsync(GetEnumsFilePath(), BuildEnumsSource(newContent, config.NewLine));
         }
 
@@ -86,9 +85,6 @@ namespace TSTypeGen
                     return false;
 
                 if (!await VerifyCompanionFileAsync(GetTypeNamesJsonFilePath(), BuildTypeNamesJsonSource(newContent)))
-                    return false;
-
-                if (!await VerifyCompanionFileAsync(GetCanonicalTypeNamesJsonFilePath(), BuildCanonicalTypeNamesJsonSource(newContent)))
                     return false;
 
                 if (!await VerifyCompanionFileAsync(GetEnumsFilePath(), BuildEnumsSource(newContent, config.NewLine)))
@@ -146,11 +142,6 @@ namespace TSTypeGen
         private string GetTypeNamesJsonFilePath()
         {
             return GetBaseFilePathWithoutDeclarationSuffix() + ".typeNames.json";
-        }
-
-        private string GetCanonicalTypeNamesJsonFilePath()
-        {
-            return GetBaseFilePathWithoutDeclarationSuffix() + ".canonicalTypeNames.json";
         }
 
         private async Task ApplyCompanionFileAsync(string filePath, string newContent)
@@ -240,60 +231,31 @@ namespace TSTypeGen
             return string.Join(newLine + newLine, declarations) + newLine;
         }
 
-        private static string BuildTypeNamesSource(string declarationFileContent, string newLine)
+        private string BuildTypeNamesSource(string declarationFileContent, string newLine)
         {
-            var (typeNameEntries, canonicalNameEntries) = GetDotNetTypeNameEntries(declarationFileContent);
+            var (typeNameEntries, _) = GetDotNetTypeNameEntries(declarationFileContent);
 
-            if (typeNameEntries.Count == 0 && canonicalNameEntries.Count == 0)
+            if (typeNameEntries.Count == 0)
                 return null;
 
             var sb = new StringBuilder();
-
-            if (typeNameEntries.Count > 0)
+            sb.Append("export const dotNetTypeNames = {").Append(newLine);
+            var seenKeys = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var entry in typeNameEntries)
             {
-                sb.Append("export const dotNetTypeNames = {").Append(newLine);
-                var seenKeys = new HashSet<string>(StringComparer.Ordinal);
-                foreach (var entry in typeNameEntries)
-                {
-                    var key = entry.Value;
-                    if (seenKeys.Contains(key))
-                        continue;
-                    seenKeys.Add(key);
+                var key = _namespaceName + "." + entry.Key;
+                if (seenKeys.Contains(key))
+                    continue;
+                seenKeys.Add(key);
 
-                    sb.Append("  \"")
-                      .Append(EscapeSingleQuotedString(key))
-                      .Append("\": '")
-                      .Append(EscapeSingleQuotedString(key))
-                      .Append("',")
-                      .Append(newLine);
-                }
-                sb.Append("} as const;").Append(newLine);
+                sb.Append("  \"")
+                  .Append(EscapeSingleQuotedString(key))
+                  .Append("\": '")
+                  .Append(EscapeSingleQuotedString(entry.Value))
+                  .Append("',")
+                  .Append(newLine);
             }
-
-            if (canonicalNameEntries.Count > 0)
-            {
-                if (typeNameEntries.Count > 0)
-                    sb.Append(newLine);
-
-                sb.Append("export const dotNetCanonicalTypeNames = {").Append(newLine);
-                var seenCanonicalKeys = new HashSet<string>(StringComparer.Ordinal);
-                foreach (var entry in canonicalNameEntries)
-                {
-                    var key = entry.Value;
-                    if (seenCanonicalKeys.Contains(key))
-                        continue;
-                    seenCanonicalKeys.Add(key);
-
-                    sb.Append("  \"")
-                      .Append(EscapeSingleQuotedString(key))
-                      .Append("\": '")
-                      .Append(EscapeSingleQuotedString(entry.Value))
-                      .Append("',")
-                      .Append(newLine);
-                }
-                sb.Append("} as const;").Append(newLine);
-            }
-
+            sb.Append("} as const;").Append(newLine);
             return sb.ToString();
         }
 
@@ -359,34 +321,31 @@ namespace TSTypeGen
             var typeNameMatches = dotNetTypeNameAndInterfaceRegex.Matches(declarationFileContent);
             var canonicalNameMatches = dotNetCanonicalTypeNameAndInterfaceRegex.Matches(declarationFileContent);
 
-            var typeNameEntries = new List<KeyValuePair<string, string>>();
-            var canonicalNameEntries = new List<KeyValuePair<string, string>>();
-            var seenNames = new HashSet<string>(StringComparer.Ordinal);
+            var typeNameEntries = new Dictionary<string, string>(StringComparer.Ordinal);
 
             foreach (Match match in typeNameMatches)
             {
                 var name = match.Groups["name"].Value;
-                if (seenNames.Contains(name))
-                    continue;
-
                 var dotNetValue = match.Groups["dotnet"].Value.Trim();
-                typeNameEntries.Add(new KeyValuePair<string, string>(name, dotNetValue));
-                seenNames.Add(name);
+
+                if (!typeNameEntries.ContainsKey(name))
+                {
+                    typeNameEntries[name] = dotNetValue;
+                }
             }
 
-            seenNames.Clear();
             foreach (Match match in canonicalNameMatches)
             {
                 var name = match.Groups["name"].Value;
-                if (seenNames.Contains(name))
-                    continue;
-
-                var dotNetValue = match.Groups["dotnet"].Value.Trim();
-                canonicalNameEntries.Add(new KeyValuePair<string, string>(name, dotNetValue));
-                seenNames.Add(name);
+                var canonicalValue = match.Groups["dotnet"].Value.Trim();
+                typeNameEntries[name] = canonicalValue;
             }
 
-            return (typeNameEntries, canonicalNameEntries);
+            var orderedEntries = typeNameEntries
+                .OrderBy(x => x.Key, StringComparer.InvariantCulture)
+                .ToList();
+
+            return (orderedEntries, new List<KeyValuePair<string, string>>());
         }
 
         private static string EscapeSingleQuotedString(string value)
@@ -422,32 +381,6 @@ namespace TSTypeGen
             var dict = new Dictionary<string, string>();
 
             foreach (var entry in typeNameEntries)
-            {
-                var key = _namespaceName + "." + entry.Key;
-                if (seenKeys.Contains(key))
-                    continue;
-                seenKeys.Add(key);
-                dict[key] = entry.Value;
-            }
-
-            return System.Text.Json.JsonSerializer.Serialize(dict, new System.Text.Json.JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            });
-        }
-
-        private string BuildCanonicalTypeNamesJsonSource(string declarationFileContent)
-        {
-            var (_, canonicalNameEntries) = GetDotNetTypeNameEntries(declarationFileContent);
-
-            if (canonicalNameEntries.Count == 0)
-                return null;
-
-            var seenKeys = new HashSet<string>(StringComparer.Ordinal);
-            var dict = new Dictionary<string, string>();
-
-            foreach (var entry in canonicalNameEntries)
             {
                 var key = _namespaceName + "." + entry.Key;
                 if (seenKeys.Contains(key))
