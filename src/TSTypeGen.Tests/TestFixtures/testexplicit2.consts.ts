@@ -3,3 +3,4 @@ export const ExplicitNamespaceTestEnum = {
   SecondValue: 'secondValue',
   ThirdValue: 'thirdValue',
 } as const;
+export type ExplicitNamespaceTestEnum = (typeof ExplicitNamespaceTestEnum)[keyof typeof ExplicitNamespaceTestEnum];

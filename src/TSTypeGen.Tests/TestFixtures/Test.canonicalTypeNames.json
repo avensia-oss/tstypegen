@@ -1,0 +1,5 @@
+{
+  "TSTypeGen.Tests.Main.TestCanonicalDotNetTypeWrapper+TestCanonicalDotNetTypeInterface3,TSTypeGen.Tests.Main": "TSTypeGen.Tests.Main.TestCanonicalDotNetTypeWrapper+TestCanonicalDotNetTypeInterface3,TSTypeGen.Tests.Main",
+  "TSTypeGen.Tests.Main.TestCanonicalDotNetTypeWrapper+TestCanonicalDotNetTypeInterface1,TSTypeGen.Tests.Main": "TSTypeGen.Tests.Main.TestCanonicalDotNetTypeWrapper+TestCanonicalDotNetTypeInterface1,TSTypeGen.Tests.Main",
+  "TSTypeGen.Tests.Main.TestCanonicalDotNetTypeWrapper+TestCanonicalDotNetTypeBaseClass2,TSTypeGen.Tests.Main": "TSTypeGen.Tests.Main.TestCanonicalDotNetTypeWrapper+TestCanonicalDotNetTypeBaseClass2,TSTypeGen.Tests.Main"
+}

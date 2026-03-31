@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -56,6 +56,9 @@ namespace TSTypeGen
 
             await ApplyCompanionFileAsync(GetConstsFilePath(), BuildConstsSource(newContent, config.NewLine));
             await ApplyCompanionFileAsync(GetTypeNamesFilePath(), BuildTypeNamesSource(newContent, config.NewLine));
+            await ApplyCompanionFileAsync(GetTypeNamesJsonFilePath(), BuildTypeNamesJsonSource(newContent));
+            await ApplyCompanionFileAsync(GetCanonicalTypeNamesJsonFilePath(), BuildCanonicalTypeNamesJsonSource(newContent));
+            await ApplyCompanionFileAsync(GetEnumsFilePath(), BuildEnumsSource(newContent, config.NewLine));
         }
 
         public async Task<bool> VerifyAsync(TypeBuilderConfig typeBuilderConfig, Config config, GeneratorContext generatorContext)
@@ -80,6 +83,15 @@ namespace TSTypeGen
                     return false;
 
                 if (!await VerifyCompanionFileAsync(GetTypeNamesFilePath(), BuildTypeNamesSource(newContent, config.NewLine)))
+                    return false;
+
+                if (!await VerifyCompanionFileAsync(GetTypeNamesJsonFilePath(), BuildTypeNamesJsonSource(newContent)))
+                    return false;
+
+                if (!await VerifyCompanionFileAsync(GetCanonicalTypeNamesJsonFilePath(), BuildCanonicalTypeNamesJsonSource(newContent)))
+                    return false;
+
+                if (!await VerifyCompanionFileAsync(GetEnumsFilePath(), BuildEnumsSource(newContent, config.NewLine)))
                     return false;
             }
             catch (Exception ex)
@@ -124,6 +136,21 @@ namespace TSTypeGen
         private string GetTypeNamesFilePath()
         {
             return GetBaseFilePathWithoutDeclarationSuffix() + ".typeNames.ts";
+        }
+
+        private string GetEnumsFilePath()
+        {
+            return GetBaseFilePathWithoutDeclarationSuffix() + ".enums.ts";
+        }
+
+        private string GetTypeNamesJsonFilePath()
+        {
+            return GetBaseFilePathWithoutDeclarationSuffix() + ".typeNames.json";
+        }
+
+        private string GetCanonicalTypeNamesJsonFilePath()
+        {
+            return GetBaseFilePathWithoutDeclarationSuffix() + ".canonicalTypeNames.json";
         }
 
         private async Task ApplyCompanionFileAsync(string filePath, string newContent)
@@ -203,7 +230,10 @@ namespace TSTypeGen
                       .Append("',")
                       .Append(newLine);
                 }
-                sb.Append("} as const;");
+                sb.Append("} as const;").Append(newLine);
+                sb.Append("export type ").Append(enumName)
+                  .Append(" = (typeof ").Append(enumName).Append(")[keyof typeof ")
+                  .Append(enumName).Append("];");
                 declarations.Add(sb.ToString());
             }
 
@@ -212,44 +242,225 @@ namespace TSTypeGen
 
         private static string BuildTypeNamesSource(string declarationFileContent, string newLine)
         {
-            var dotNetTypeNameAndInterfaceRegex = new Regex(@"@DotNetTypeName\s+(?<dotnet>[^\r\n*]+)[\s\S]*?interface\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\b", RegexOptions.Multiline);
-            var matches = dotNetTypeNameAndInterfaceRegex.Matches(declarationFileContent);
-            if (matches.Count == 0)
-                return null;
+            var (typeNameEntries, canonicalNameEntries) = GetDotNetTypeNameEntries(declarationFileContent);
 
-            var orderedEntries = new List<KeyValuePair<string, string>>();
-            var seen = new HashSet<string>(StringComparer.Ordinal);
-            foreach (Match match in matches)
-            {
-                var name = match.Groups["name"].Value;
-                if (seen.Contains(name))
-                    continue;
-
-                orderedEntries.Add(new KeyValuePair<string, string>(name, match.Groups["dotnet"].Value.Trim()));
-                seen.Add(name);
-            }
-
-            if (orderedEntries.Count == 0)
+            if (typeNameEntries.Count == 0 && canonicalNameEntries.Count == 0)
                 return null;
 
             var sb = new StringBuilder();
-            sb.Append("export const dotNetTypeNames = {").Append(newLine);
-            foreach (var entry in orderedEntries)
+
+            if (typeNameEntries.Count > 0)
             {
-                sb.Append("  ")
-                  .Append(entry.Key)
-                  .Append(": '")
-                  .Append(EscapeSingleQuotedString(entry.Value))
-                  .Append("',")
-                  .Append(newLine);
+                sb.Append("export const dotNetTypeNames = {").Append(newLine);
+                var seenKeys = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var entry in typeNameEntries)
+                {
+                    var key = entry.Value;
+                    if (seenKeys.Contains(key))
+                        continue;
+                    seenKeys.Add(key);
+
+                    sb.Append("  \"")
+                      .Append(EscapeSingleQuotedString(key))
+                      .Append("\": '")
+                      .Append(EscapeSingleQuotedString(key))
+                      .Append("',")
+                      .Append(newLine);
+                }
+                sb.Append("} as const;").Append(newLine);
             }
-            sb.Append("} as const;").Append(newLine);
+
+            if (canonicalNameEntries.Count > 0)
+            {
+                if (typeNameEntries.Count > 0)
+                    sb.Append(newLine);
+
+                sb.Append("export const dotNetCanonicalTypeNames = {").Append(newLine);
+                var seenCanonicalKeys = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var entry in canonicalNameEntries)
+                {
+                    var key = entry.Value;
+                    if (seenCanonicalKeys.Contains(key))
+                        continue;
+                    seenCanonicalKeys.Add(key);
+
+                    sb.Append("  \"")
+                      .Append(EscapeSingleQuotedString(key))
+                      .Append("\": '")
+                      .Append(EscapeSingleQuotedString(entry.Value))
+                      .Append("',")
+                      .Append(newLine);
+                }
+                sb.Append("} as const;").Append(newLine);
+            }
+
             return sb.ToString();
+        }
+
+        private static string BuildEnumsSource(string declarationFileContent, string newLine)
+        {
+            var enumRegex = new Regex(@"^\s*const enum\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*\{(?<body>[\s\S]*?)^\s*\}", RegexOptions.Multiline);
+            var memberRegex = new Regex(@"^\s*(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*'(?<value>[^']*)',?\s*$", RegexOptions.Multiline);
+            var enumMatches = enumRegex.Matches(declarationFileContent);
+
+            var (typeNameEntries, canonicalNameEntries) = GetDotNetTypeNameEntries(declarationFileContent);
+
+            var declarations = new List<string>();
+
+            foreach (Match enumMatch in enumMatches)
+            {
+                var enumName = enumMatch.Groups["name"].Value;
+                var body = enumMatch.Groups["body"].Value;
+                var members = memberRegex.Matches(body);
+
+                var sb = new StringBuilder();
+                sb.Append("export const enum ").Append(enumName).Append(" {").Append(newLine);
+                foreach (Match member in members)
+                {
+                    sb.Append("  ")
+                      .Append(member.Groups["name"].Value)
+                      .Append(" = '")
+                      .Append(EscapeSingleQuotedString(member.Groups["value"].Value))
+                      .Append("',")
+                      .Append(newLine);
+                }
+                sb.Append("}");
+                declarations.Add(sb.ToString());
+            }
+
+            if (typeNameEntries.Count > 0)
+            {
+                var sb = new StringBuilder();
+                sb.Append("export const enum DotNetTypeNames {").Append(newLine);
+                foreach (var entry in typeNameEntries)
+                {
+                    sb.Append("  ")
+                      .Append(SanitizeTypeScriptIdentifier(entry.Key))
+                      .Append(" = '")
+                      .Append(EscapeSingleQuotedString(entry.Value))
+                      .Append("',")
+                      .Append(newLine);
+                }
+                sb.Append("}");
+                declarations.Add(sb.ToString());
+            }
+
+            if (declarations.Count == 0)
+                return null;
+
+            return string.Join(newLine + newLine, declarations) + newLine;
+        }
+
+        private static (List<KeyValuePair<string, string>> typeNameEntries, List<KeyValuePair<string, string>> canonicalNameEntries) GetDotNetTypeNameEntries(string declarationFileContent)
+        {
+            var dotNetTypeNameAndInterfaceRegex = new Regex(@"@DotNetTypeName\s+(?<dotnet>[^\r\n*]+)[\s\S]*?interface\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\b", RegexOptions.Multiline);
+            var dotNetCanonicalTypeNameAndInterfaceRegex = new Regex(@"@DotNetCanonicalTypeName\s+(?<dotnet>[^\r\n*]+)[\s\S]*?interface\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\b", RegexOptions.Multiline);
+
+            var typeNameMatches = dotNetTypeNameAndInterfaceRegex.Matches(declarationFileContent);
+            var canonicalNameMatches = dotNetCanonicalTypeNameAndInterfaceRegex.Matches(declarationFileContent);
+
+            var typeNameEntries = new List<KeyValuePair<string, string>>();
+            var canonicalNameEntries = new List<KeyValuePair<string, string>>();
+            var seenNames = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (Match match in typeNameMatches)
+            {
+                var name = match.Groups["name"].Value;
+                if (seenNames.Contains(name))
+                    continue;
+
+                var dotNetValue = match.Groups["dotnet"].Value.Trim();
+                typeNameEntries.Add(new KeyValuePair<string, string>(name, dotNetValue));
+                seenNames.Add(name);
+            }
+
+            seenNames.Clear();
+            foreach (Match match in canonicalNameMatches)
+            {
+                var name = match.Groups["name"].Value;
+                if (seenNames.Contains(name))
+                    continue;
+
+                var dotNetValue = match.Groups["dotnet"].Value.Trim();
+                canonicalNameEntries.Add(new KeyValuePair<string, string>(name, dotNetValue));
+                seenNames.Add(name);
+            }
+
+            return (typeNameEntries, canonicalNameEntries);
         }
 
         private static string EscapeSingleQuotedString(string value)
         {
             return value.Replace("\\", "\\\\").Replace("'", "\\'");
+        }
+
+        private static string SanitizeTypeScriptIdentifier(string name)
+        {
+            var result = new StringBuilder();
+            foreach (var c in name)
+            {
+                if (char.IsLetterOrDigit(c) || c == '_')
+                {
+                    result.Append(c);
+                }
+                else
+                {
+                    result.Append('_');
+                }
+            }
+            return result.ToString();
+        }
+
+        private static string BuildTypeNamesJsonSource(string declarationFileContent)
+        {
+            var (typeNameEntries, _) = GetDotNetTypeNameEntries(declarationFileContent);
+
+            if (typeNameEntries.Count == 0)
+                return null;
+
+            var seenKeys = new HashSet<string>(StringComparer.Ordinal);
+            var dict = new Dictionary<string, string>();
+
+            foreach (var entry in typeNameEntries)
+            {
+                var key = entry.Value;
+                if (seenKeys.Contains(key))
+                    continue;
+                seenKeys.Add(key);
+                dict[key] = key;
+            }
+
+            return System.Text.Json.JsonSerializer.Serialize(dict, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
+        }
+
+        private static string BuildCanonicalTypeNamesJsonSource(string declarationFileContent)
+        {
+            var (_, canonicalNameEntries) = GetDotNetTypeNameEntries(declarationFileContent);
+
+            if (canonicalNameEntries.Count == 0)
+                return null;
+
+            var seenKeys = new HashSet<string>(StringComparer.Ordinal);
+            var dict = new Dictionary<string, string>();
+
+            foreach (var entry in canonicalNameEntries)
+            {
+                var key = entry.Value;
+                if (seenKeys.Contains(key))
+                    continue;
+                seenKeys.Add(key);
+                dict[key] = entry.Value;
+            }
+
+            return System.Text.Json.JsonSerializer.Serialize(dict, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
         }
     }
 }
