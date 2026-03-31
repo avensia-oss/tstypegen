@@ -5,10 +5,10 @@
     "module": "esnext",
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./",
-
+    "rootDir": "./src",
     "strict": true,
     "types": ["node"],
     "skipLibCheck": true
-  }
+  },
+  "exclude": ["src/TSTypeGen.Tests", "**/*.d.ts"]
 }
