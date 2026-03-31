@@ -522,3 +522,12 @@ MigrationBackup/
 
 dist/
 .idea/
+
+# Yarn v4+
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
