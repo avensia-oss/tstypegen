@@ -1,4 +1,4 @@
-import tsTypeGen from './main';
+import tsTypeGen from './main.mjs';
 
 const args = process.argv.slice(2);
 const HELP_ARG_NAMES = ['--help', '-h'];
@@ -46,9 +46,7 @@ async function main() {
 
     try {
       if (typeof solutionFile === typeof projectFile) {
-        throw new Error(
-          'Choose the path to either a project or solution file.'
-        );
+        throw new Error('Choose the path to either a project or solution file.');
       }
 
       if (typeof configFile === 'undefined') {

@@ -3,14 +3,14 @@
 namespace TSTypeGen.Tests.Main
 {
     [GenerateTypeScriptDefinition]
-    public class TestInheritanceBase
+    public record TestRecordInheritanceBase
     {
         public int Prop1 { get; set; }
     }
 
     [GenerateTypeScriptDefinition]
-    public class TestInheritanceClass : TestInheritanceBase
+    public record TestRecordInheritance : TestRecordInheritanceBase
     {
-        public int Prop2 { get; set; }
+        public string Prop2 { get; set; }
     }
 }

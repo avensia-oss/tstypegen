@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Nuclear.Assemblies;
+using Nuclear.Assemblies.Runtimes;
+using Nuclear.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Nuclear.Assemblies;
-using Nuclear.Assemblies.Runtimes;
-using Nuclear.Extensions;
 
 namespace TSTypeGen
 {

@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 
 type Solution = {
   solutionFile: string;
@@ -17,6 +18,8 @@ type Options = {
 function tsTypeGen(options: Solution & Options): Promise<void>;
 function tsTypeGen(options: Project & Options): Promise<void>;
 function tsTypeGen(options: (Solution | Project) & Options) {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
   const args: string[] = [
     JSON.stringify(path.join(__dirname, '..', 'bin', 'TSTypeGen.dll')),
   ];
