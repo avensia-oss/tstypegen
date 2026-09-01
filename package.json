@@ -1,12 +1,12 @@
 {
   "name": "@avensia-oss/tstypegen",
-  "version": "4.0.0-rc0002",
+  "version": "4.1.0-rc0001",
   "description": "A tool to generate TypeScript types from C# types",
   "main": "./dist/main.mjs",
   "types": "./dist/main.d.mts",
   "bin": "./dist/cli.mjs",
   "repository": "https://github.com/avensia-oss/tstypegen",
-  "author": "Anders Ekdahl <anders.ekdahl@avensia.com>",
+  "author": "",
   "license": "MIT",
   "private": false,
   "publishConfig": {
