@@ -1,0 +1,900 @@
+{
+  "settings": {
+    "components": {
+      "code": true,
+      "binaries": false
+    },
+    "targetId": "net10.0",
+    "targetDisplayName": ".NETCoreApp,Version=v10.0"
+  },
+  "analysisStartTime": "2026-09-01T12:28:07.968706Z",
+  "analysisEndTime": "2026-09-01T12:28:11.4200445Z",
+  "privacyModeHelpUrl": "https://go.microsoft.com/fwlink/?linkid=2270980",
+  "stats": {
+    "summary": {
+      "projects": 4,
+      "issues": 3,
+      "incidents": 29,
+      "effort": 29
+    },
+    "charts": {
+      "severity": {
+        "Mandatory": 4,
+        "Optional": 0,
+        "Potential": 25,
+        "Information": 0
+      },
+      "category": {
+        "NuGet": 8,
+        "Project": 4,
+        "Api": 17
+      }
+    }
+  },
+  "projects": [
+    {
+      "path": "src\\TSTypeGen\\TSTypeGen.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 22,
+      "properties": {
+        "appName": "TSTypeGen",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net8.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "isTestProject": true,
+        "numberOfFiles": 18,
+        "numberOfCodeFiles": 16,
+        "linesTotal": 4288,
+        "linesOfCode": 2505,
+        "totalApiScanned": 2559,
+        "minLinesOfCodeToChange": 17,
+        "maxLinesOfCodeToChange": 17
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "182288c6-462b-46f1-9bb2-021a5d3ed79c",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.FileSystemGlobbing, 8.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.FileSystemGlobbing, and replace with new package Microsoft.Extensions.FileSystemGlobbing 10.0.11",
+              "protected": "Microsoft.Extensions.FileSystemGlobbing, 8.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.FileSystemGlobbing, and replace with new package Microsoft.Extensions.FileSystemGlobbing 10.0.11"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\TSTypeGen.csproj",
+            "snippet": "Microsoft.Extensions.FileSystemGlobbing, 8.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.FileSystemGlobbing, and replace with new package Microsoft.Extensions.FileSystemGlobbing 10.0.11",
+            "protectedSnippet": "Microsoft.Extensions.FileSystemGlobbing, 8.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.FileSystemGlobbing, and replace with new package Microsoft.Extensions.FileSystemGlobbing 10.0.11",
+            "label": "Microsoft.Extensions.FileSystemGlobbing 8.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.FileSystemGlobbing",
+              "PackageVersion": "8.0.0",
+              "PackageNewVersion": "10.0.11",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "fe05a1c1-6257-4b16-a0cc-ed69787adb2f",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+              "protected": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\TSTypeGen.csproj",
+            "snippet": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+            "protectedSnippet": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+            "label": "Newtonsoft.Json 13.0.3",
+            "properties": {
+              "PackageId": "Newtonsoft.Json",
+              "PackageVersion": "13.0.3",
+              "PackageNewVersion": "13.0.4",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "d3487e89-2b0a-4d0d-a60e-149f0dc243d0",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.CodeDom, 8.0.0\n\nRecommendation:\n\nRemove System.CodeDom, and replace with new package System.CodeDom 10.0.11",
+              "protected": "System.CodeDom, 8.0.0\n\nRecommendation:\n\nRemove System.CodeDom, and replace with new package System.CodeDom 10.0.11"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\TSTypeGen.csproj",
+            "snippet": "System.CodeDom, 8.0.0\n\nRecommendation:\n\nRemove System.CodeDom, and replace with new package System.CodeDom 10.0.11",
+            "protectedSnippet": "System.CodeDom, 8.0.0\n\nRecommendation:\n\nRemove System.CodeDom, and replace with new package System.CodeDom 10.0.11",
+            "label": "System.CodeDom 8.0.0",
+            "properties": {
+              "PackageId": "System.CodeDom",
+              "PackageVersion": "8.0.0",
+              "PackageNewVersion": "10.0.11",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "d2385649-eabc-4962-aede-de59756a0454",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Reflection.MetadataLoadContext, 8.0.1\n\nRecommendation:\n\nRemove System.Reflection.MetadataLoadContext, and replace with new package System.Reflection.MetadataLoadContext 10.0.11",
+              "protected": "System.Reflection.MetadataLoadContext, 8.0.1\n\nRecommendation:\n\nRemove System.Reflection.MetadataLoadContext, and replace with new package System.Reflection.MetadataLoadContext 10.0.11"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\TSTypeGen.csproj",
+            "snippet": "System.Reflection.MetadataLoadContext, 8.0.1\n\nRecommendation:\n\nRemove System.Reflection.MetadataLoadContext, and replace with new package System.Reflection.MetadataLoadContext 10.0.11",
+            "protectedSnippet": "System.Reflection.MetadataLoadContext, 8.0.1\n\nRecommendation:\n\nRemove System.Reflection.MetadataLoadContext, and replace with new package System.Reflection.MetadataLoadContext 10.0.11",
+            "label": "System.Reflection.MetadataLoadContext 8.0.1",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageVersion": "8.0.1",
+              "PackageNewVersion": "10.0.11",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "6bb3bf00-2bf7-4ebf-a054-b67b3c9c6880",
+          "ruleId": "Project.0002",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net8.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net8.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\TSTypeGen.csproj",
+            "snippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net8.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        },
+        {
+          "incidentId": "280e26b0-1565-4ca1-9c31-7b5e5b584b53",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName)",
+              "protected": "T:System.Reflection.MetadataLoadContext"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName)",
+            "protectedSnippet": "T:System.Reflection.MetadataLoadContext",
+            "label": "T:System.Reflection.MetadataLoadContext",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 26,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "002d18f7-9313-4824-903e-13562caaa40d",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "asm = context.LoadFromAssemblyPath(candidates.First().FullName);",
+              "protected": "M:System.Reflection.MetadataLoadContext.LoadFromAssemblyPath(System.String)"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "asm = context.LoadFromAssemblyPath(candidates.First().FullName);",
+            "protectedSnippet": "M:System.Reflection.MetadataLoadContext.LoadFromAssemblyPath(System.String)",
+            "label": "M:System.Reflection.MetadataLoadContext.LoadFromAssemblyPath(System.String)",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 37,
+            "column": 24
+          }
+        },
+        {
+          "incidentId": "f8d83091-61d2-4e55-96dc-fb6de914c51c",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var asm = _pathAssemblyResolver.Resolve(context, assemblyName);",
+              "protected": "T:System.Reflection.PathAssemblyResolver"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "var asm = _pathAssemblyResolver.Resolve(context, assemblyName);",
+            "protectedSnippet": "T:System.Reflection.PathAssemblyResolver",
+            "label": "T:System.Reflection.PathAssemblyResolver",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 28,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "e1a0f79e-eb91-4230-9a2b-4222e89a7d8d",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var asm = _pathAssemblyResolver.Resolve(context, assemblyName);",
+              "protected": "M:System.Reflection.PathAssemblyResolver.Resolve(System.Reflection.MetadataLoadContext,System.Reflection.AssemblyName)"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "var asm = _pathAssemblyResolver.Resolve(context, assemblyName);",
+            "protectedSnippet": "M:System.Reflection.PathAssemblyResolver.Resolve(System.Reflection.MetadataLoadContext,System.Reflection.AssemblyName)",
+            "label": "M:System.Reflection.PathAssemblyResolver.Resolve(System.Reflection.MetadataLoadContext,System.Reflection.AssemblyName)",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 28,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "58f902e3-8aa5-45f2-8c7e-d4341522189f",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver, ICollection\u003Cstring\u003E packagesDirectories)\n        {\n            _pathAssemblyResolver = pathAssemblyResolver;\n            _nugetCaches = packagesDirectories?.Count \u003E 0 ? packagesDirectories.Select(d =\u003E new DirectoryInfo(d)).ToList() : GetCaches();\n        }",
+              "protected": "T:System.Reflection.PathAssemblyResolver"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver, ICollection\u003Cstring\u003E packagesDirectories)\n        {\n            _pathAssemblyResolver = pathAssemblyResolver;\n            _nugetCaches = packagesDirectories?.Count \u003E 0 ? packagesDirectories.Select(d =\u003E new DirectoryInfo(d)).ToList() : GetCaches();\n        }",
+            "protectedSnippet": "T:System.Reflection.PathAssemblyResolver",
+            "label": "T:System.Reflection.PathAssemblyResolver",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 20,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "f9b0f280-95ee-45b8-990e-732774d84207",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_pathAssemblyResolver = pathAssemblyResolver;",
+              "protected": "T:System.Reflection.PathAssemblyResolver"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "_pathAssemblyResolver = pathAssemblyResolver;",
+            "protectedSnippet": "T:System.Reflection.PathAssemblyResolver",
+            "label": "T:System.Reflection.PathAssemblyResolver",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 22,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "07bdbf40-dd1c-4c51-8add-5c5c360099ab",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver, ICollection\u003Cstring\u003E packagesDirectories)\n        {\n            _pathAssemblyResolver = pathAssemblyResolver;\n            _nugetCaches = packagesDirectories?.Count \u003E 0 ? packagesDirectories.Select(d =\u003E new DirectoryInfo(d)).ToList() : GetCaches();\n        }",
+              "protected": "M:System.Reflection.MetadataAssemblyResolver.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver, ICollection\u003Cstring\u003E packagesDirectories)\n        {\n            _pathAssemblyResolver = pathAssemblyResolver;\n            _nugetCaches = packagesDirectories?.Count \u003E 0 ? packagesDirectories.Select(d =\u003E new DirectoryInfo(d)).ToList() : GetCaches();\n        }",
+            "protectedSnippet": "M:System.Reflection.MetadataAssemblyResolver.#ctor",
+            "label": "M:System.Reflection.MetadataAssemblyResolver.#ctor",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 20,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "2a37083f-21bd-4b16-89ea-22e52a780d4b",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_pathAssemblyResolver",
+              "protected": "T:System.Reflection.PathAssemblyResolver"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "_pathAssemblyResolver",
+            "protectedSnippet": "T:System.Reflection.PathAssemblyResolver",
+            "label": "T:System.Reflection.PathAssemblyResolver",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 13,
+            "column": 46
+          }
+        },
+        {
+          "incidentId": "c801090c-8f55-47f4-95af-eeb36d4d5a15",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver, ICollection\u003Cstring\u003E packagesDirectories)\n        {\n            _pathAssemblyResolver = pathAssemblyResolver;\n            _nugetCaches = packagesDirectories?.Count \u003E 0 ? packagesDirectories.Select(d =\u003E new DirectoryInfo(d)).ToList() : GetCaches();\n        }",
+              "protected": "T:System.Reflection.PathAssemblyResolver"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver, ICollection\u003Cstring\u003E packagesDirectories)\n        {\n            _pathAssemblyResolver = pathAssemblyResolver;\n            _nugetCaches = packagesDirectories?.Count \u003E 0 ? packagesDirectories.Select(d =\u003E new DirectoryInfo(d)).ToList() : GetCaches();\n        }",
+            "protectedSnippet": "T:System.Reflection.PathAssemblyResolver",
+            "label": "T:System.Reflection.PathAssemblyResolver",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 20,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "d55d1c9a-bcee-479f-9ac5-5f12756a512a",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "_pathAssemblyResolver = pathAssemblyResolver;",
+              "protected": "T:System.Reflection.PathAssemblyResolver"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "_pathAssemblyResolver = pathAssemblyResolver;",
+            "protectedSnippet": "T:System.Reflection.PathAssemblyResolver",
+            "label": "T:System.Reflection.PathAssemblyResolver",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 22,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "433aed9a-3113-4053-92bf-905c1d20c507",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver, ICollection\u003Cstring\u003E packagesDirectories)\n        {\n            _pathAssemblyResolver = pathAssemblyResolver;\n            _nugetCaches = packagesDirectories?.Count \u003E 0 ? packagesDirectories.Select(d =\u003E new DirectoryInfo(d)).ToList() : GetCaches();\n        }",
+              "protected": "M:System.Reflection.MetadataAssemblyResolver.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "public CustomMetadataAssemblyResolver(PathAssemblyResolver pathAssemblyResolver, ICollection\u003Cstring\u003E packagesDirectories)\n        {\n            _pathAssemblyResolver = pathAssemblyResolver;\n            _nugetCaches = packagesDirectories?.Count \u003E 0 ? packagesDirectories.Select(d =\u003E new DirectoryInfo(d)).ToList() : GetCaches();\n        }",
+            "protectedSnippet": "M:System.Reflection.MetadataAssemblyResolver.#ctor",
+            "label": "M:System.Reflection.MetadataAssemblyResolver.#ctor",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 20,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "04b104f6-1d0d-4444-bca9-3d92ad3b9a43",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "MetadataAssemblyResolver",
+              "protected": "T:System.Reflection.MetadataAssemblyResolver"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\CustomMetadataAssemblyResolver.cs",
+            "snippet": "MetadataAssemblyResolver",
+            "protectedSnippet": "T:System.Reflection.MetadataAssemblyResolver",
+            "label": "T:System.Reflection.MetadataAssemblyResolver",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "7622"
+            },
+            "line": 11,
+            "column": 50
+          }
+        },
+        {
+          "incidentId": "1b2d6c86-c12b-4363-af2b-128cf77ecf50",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var assembly = mlc.LoadFromAssemblyPath(dll);",
+              "protected": "M:System.Reflection.MetadataLoadContext.LoadFromAssemblyPath(System.String)"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\Processor.cs",
+            "snippet": "var assembly = mlc.LoadFromAssemblyPath(dll);",
+            "protectedSnippet": "M:System.Reflection.MetadataLoadContext.LoadFromAssemblyPath(System.String)",
+            "label": "M:System.Reflection.MetadataLoadContext.LoadFromAssemblyPath(System.String)",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "16666"
+            },
+            "line": 196,
+            "column": 28
+          }
+        },
+        {
+          "incidentId": "f40db02f-53ce-4a16-991c-2202235b1746",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var mlc = new MetadataLoadContext(resolver);",
+              "protected": "T:System.Reflection.MetadataLoadContext"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\Processor.cs",
+            "snippet": "var mlc = new MetadataLoadContext(resolver);",
+            "protectedSnippet": "T:System.Reflection.MetadataLoadContext",
+            "label": "T:System.Reflection.MetadataLoadContext",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "16666"
+            },
+            "line": 179,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "776a25cd-143a-45ca-8e95-a3154ad9e40e",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var mlc = new MetadataLoadContext(resolver);",
+              "protected": "M:System.Reflection.MetadataLoadContext.#ctor(System.Reflection.MetadataAssemblyResolver,System.String)"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\Processor.cs",
+            "snippet": "var mlc = new MetadataLoadContext(resolver);",
+            "protectedSnippet": "M:System.Reflection.MetadataLoadContext.#ctor(System.Reflection.MetadataAssemblyResolver,System.String)",
+            "label": "M:System.Reflection.MetadataLoadContext.#ctor(System.Reflection.MetadataAssemblyResolver,System.String)",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "16666"
+            },
+            "line": 179,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "fbe827c2-813a-49a0-8755-b6b2a34e68e6",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths), _config.PackagesDirectories);",
+              "protected": "T:System.Reflection.PathAssemblyResolver"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\Processor.cs",
+            "snippet": "var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths), _config.PackagesDirectories);",
+            "protectedSnippet": "T:System.Reflection.PathAssemblyResolver",
+            "label": "T:System.Reflection.PathAssemblyResolver",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "16666"
+            },
+            "line": 178,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "5c86a8e6-69d0-41c5-be2d-80e8c212ef83",
+          "ruleId": "Api.0002",
+          "description": "API is available in package System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3. Add package reference to System.Reflection.MetadataLoadContext, 9.0.0-preview.6.24302.3",
+          "projectPath": "src\\TSTypeGen\\TSTypeGen.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths), _config.PackagesDirectories);",
+              "protected": "M:System.Reflection.PathAssemblyResolver.#ctor(System.Collections.Generic.IEnumerable{System.String})"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen\\Processor.cs",
+            "snippet": "var resolver = new CustomMetadataAssemblyResolver(new PathAssemblyResolver(dllPaths), _config.PackagesDirectories);",
+            "protectedSnippet": "M:System.Reflection.PathAssemblyResolver.#ctor(System.Collections.Generic.IEnumerable{System.String})",
+            "label": "M:System.Reflection.PathAssemblyResolver.#ctor(System.Collections.Generic.IEnumerable{System.String})",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageNewVersion": "9.0.0-preview.6.24302.3",
+              "CharCount": "16666"
+            },
+            "line": 178,
+            "column": 16
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+      "startingProject": true,
+      "issues": 2,
+      "storyPoints": 5,
+      "properties": {
+        "appName": "TSTypeGen.Tests",
+        "projectKind": "DotNetCoreApp",
+        "frameworks": [
+          "net8.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "isTestProject": true,
+        "numberOfFiles": 3,
+        "numberOfCodeFiles": 1,
+        "linesTotal": 1854,
+        "linesOfCode": 71,
+        "totalApiScanned": 80,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "68624bf6-9feb-4a7e-b301-83d865b691c6",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.Extensions.FileSystemGlobbing, 8.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.FileSystemGlobbing, and replace with new package Microsoft.Extensions.FileSystemGlobbing 10.0.11",
+              "protected": "Microsoft.Extensions.FileSystemGlobbing, 8.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.FileSystemGlobbing, and replace with new package Microsoft.Extensions.FileSystemGlobbing 10.0.11"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+            "snippet": "Microsoft.Extensions.FileSystemGlobbing, 8.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.FileSystemGlobbing, and replace with new package Microsoft.Extensions.FileSystemGlobbing 10.0.11",
+            "protectedSnippet": "Microsoft.Extensions.FileSystemGlobbing, 8.0.0\n\nRecommendation:\n\nRemove Microsoft.Extensions.FileSystemGlobbing, and replace with new package Microsoft.Extensions.FileSystemGlobbing 10.0.11",
+            "label": "Microsoft.Extensions.FileSystemGlobbing 8.0.0",
+            "properties": {
+              "PackageId": "Microsoft.Extensions.FileSystemGlobbing",
+              "PackageVersion": "8.0.0",
+              "PackageNewVersion": "10.0.11",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "b7a2e858-8444-48c6-999f-b78070032b96",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+              "protected": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+            "snippet": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+            "protectedSnippet": "Newtonsoft.Json, 13.0.3\n\nRecommendation:\n\nRemove Newtonsoft.Json, and replace with new package Newtonsoft.Json 13.0.4",
+            "label": "Newtonsoft.Json 13.0.3",
+            "properties": {
+              "PackageId": "Newtonsoft.Json",
+              "PackageVersion": "13.0.3",
+              "PackageNewVersion": "13.0.4",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "6ae9938e-363e-47e8-aa28-fb1d093e0454",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.CodeDom, 8.0.0\n\nRecommendation:\n\nRemove System.CodeDom, and replace with new package System.CodeDom 10.0.11",
+              "protected": "System.CodeDom, 8.0.0\n\nRecommendation:\n\nRemove System.CodeDom, and replace with new package System.CodeDom 10.0.11"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+            "snippet": "System.CodeDom, 8.0.0\n\nRecommendation:\n\nRemove System.CodeDom, and replace with new package System.CodeDom 10.0.11",
+            "protectedSnippet": "System.CodeDom, 8.0.0\n\nRecommendation:\n\nRemove System.CodeDom, and replace with new package System.CodeDom 10.0.11",
+            "label": "System.CodeDom 8.0.0",
+            "properties": {
+              "PackageId": "System.CodeDom",
+              "PackageVersion": "8.0.0",
+              "PackageNewVersion": "10.0.11",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "855baf43-f21c-4ddf-9b39-53a0eebd3799",
+          "ruleId": "NuGet.0002",
+          "projectPath": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Reflection.MetadataLoadContext, 8.0.1\n\nRecommendation:\n\nRemove System.Reflection.MetadataLoadContext, and replace with new package System.Reflection.MetadataLoadContext 10.0.11",
+              "protected": "System.Reflection.MetadataLoadContext, 8.0.1\n\nRecommendation:\n\nRemove System.Reflection.MetadataLoadContext, and replace with new package System.Reflection.MetadataLoadContext 10.0.11"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+            "snippet": "System.Reflection.MetadataLoadContext, 8.0.1\n\nRecommendation:\n\nRemove System.Reflection.MetadataLoadContext, and replace with new package System.Reflection.MetadataLoadContext 10.0.11",
+            "protectedSnippet": "System.Reflection.MetadataLoadContext, 8.0.1\n\nRecommendation:\n\nRemove System.Reflection.MetadataLoadContext, and replace with new package System.Reflection.MetadataLoadContext 10.0.11",
+            "label": "System.Reflection.MetadataLoadContext 8.0.1",
+            "properties": {
+              "PackageId": "System.Reflection.MetadataLoadContext",
+              "PackageVersion": "8.0.1",
+              "PackageNewVersion": "10.0.11",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "b7a05734-a2f6-4d46-b065-5beb82e845c7",
+          "ruleId": "Project.0002",
+          "projectPath": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net8.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net8.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen.Tests\\TSTypeGen.Tests.csproj",
+            "snippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net8.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "src\\TSTypeGen.Tests.Main\\TSTypeGen.Tests.Main.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 1,
+      "properties": {
+        "appName": "TSTypeGen.Tests.Main",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net8.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "isTestProject": false,
+        "numberOfFiles": 39,
+        "numberOfCodeFiles": 39,
+        "linesTotal": 1069,
+        "linesOfCode": 1069,
+        "totalApiScanned": 616,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "6a314883-5576-4ba0-9275-ae08ee759ced",
+          "ruleId": "Project.0002",
+          "projectPath": "src\\TSTypeGen.Tests.Main\\TSTypeGen.Tests.Main.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net8.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net8.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen.Tests.Main\\TSTypeGen.Tests.Main.csproj",
+            "snippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net8.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    },
+    {
+      "path": "src\\TSTypeGen.Tests.Shared\\TSTypeGen.Tests.Shared.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 1,
+      "properties": {
+        "appName": "TSTypeGen.Tests.Shared",
+        "projectKind": "ClassLibrary",
+        "frameworks": [
+          "net8.0"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "isTestProject": false,
+        "numberOfFiles": 3,
+        "numberOfCodeFiles": 3,
+        "linesTotal": 53,
+        "linesOfCode": 53,
+        "totalApiScanned": 142,
+        "minLinesOfCodeToChange": 0,
+        "maxLinesOfCodeToChange": 0
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "e2566c19-a089-4875-bc47-b311b7929db8",
+          "ruleId": "Project.0002",
+          "projectPath": "src\\TSTypeGen.Tests.Shared\\TSTypeGen.Tests.Shared.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Current target framework: net8.0\nRecommended target framework: net10.0",
+              "protected": "Current target framework: net8.0\nRecommended target framework: net10.0"
+            },
+            "kind": "File",
+            "path": "src\\TSTypeGen.Tests.Shared\\TSTypeGen.Tests.Shared.csproj",
+            "snippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "protectedSnippet": "Current target framework: net8.0\nRecommended target framework: net10.0",
+            "properties": {
+              "CurrentTargetFramework": "net8.0",
+              "RecommendedTargetFramework": "net10.0"
+            }
+          }
+        }
+      ],
+      "features": []
+    }
+  ],
+  "rules": {
+    "NuGet.0002": {
+      "id": "NuGet.0002",
+      "isFeature": false,
+      "description": "NuGet package upgrade is recommended for selected target framework.\n\nStandard .NET packages are recommended to have versions matching version of .NET that project targets.\n\nSome other packages also are known to work better for selected target frameworks.",
+      "label": "NuGet package upgrade is recommended",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262530",
+          "isCustom": false
+        }
+      ]
+    },
+    "Project.0002": {
+      "id": "Project.0002",
+      "isFeature": false,
+      "description": "Project\u0027s target framework(s) needs to be changed to the new target framework that you selected for this upgrade.\n\nDuring upgrade target framework will be adjusted to corresponding platform when applicable. In some cases project would result in multiple target frameworks after the upgrade if it was using features that now have their own platforms in modern .NET frameworks (windows, iOS, Android etc).",
+      "label": "Project\u0027s target framework(s) needs to be changed",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Overview of porting from .NET Framework to .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265227",
+          "isCustom": false
+        },
+        {
+          "title": ".NET project SDKs",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265226",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0002": {
+      "id": "Api.0002",
+      "isFeature": false,
+      "description": "API is source incompatible for selected .NET version: requires code changes to compile successfully when targeting a new version, such as removing obsolete APIs or changing method signatures.",
+      "label": "Source incompatible for selected .NET version",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "title": "Breaking changes in .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262679",
+          "isCustom": false
+        }
+      ]
+    }
+  }
+}
