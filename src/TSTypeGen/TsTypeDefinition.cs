@@ -369,7 +369,7 @@ namespace TSTypeGen
                     {
                         sb.Append("{}");
                     }
-                    sb.AppendLine(";");
+                    sb.Append(';').Append(config.NewLine);
                 }
                 return sb.ToString();
             }
