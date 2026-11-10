@@ -14,4 +14,14 @@
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="8.0.1" />
   </ItemGroup>
 
+  <!-- A newer timestamp on a stale DLL must not prevent it from being replaced. -->
+  <Target Name="AlwaysCopyPublishFiles" BeforeTargets="_ComputeResolvedFilesToPublishTypes">
+    <ItemGroup>
+      <ResolvedFileToPublish Update="@(ResolvedFileToPublish)" CopyToPublishDirectory="Always" />
+    </ItemGroup>
+    <PropertyGroup>
+      <SkipCopyUnchangedFiles>false</SkipCopyUnchangedFiles>
+    </PropertyGroup>
+  </Target>
+
 </Project>
