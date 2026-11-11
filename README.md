@@ -7,7 +7,7 @@ This program will generate TypeScript definitions from C# types. It's built on .
 TSTypeGen is distributed as an npm package, install by doing:
 
 ```
-yarn add @avensia-oss/tstypegen
+npm install @avensia-oss/tstypegen
 ```
 
 ## Usage
@@ -55,6 +55,7 @@ The config file is a JSON with the following options:
 - `typeMappings`: A dictionary that maps type full C# names (including namespaces) to corresponding TypeScript types.
 - `customTypeScriptIgnoreAttributeFullName`: Name of a custom attribute to treat the same as `[JsonIgnore]` and `[TypeScriptIgnore]`
 - `propertyWrappers`: A dictionary that defines wrappers for properties in the listed types
+- `generateEnumFiles`: Generate optional `.enums.ts` companion files containing exported const enums and `DotNetTypeNames`. Defaults to `false`. Does not affect enums in `.d.ts` or the `.consts.ts`, `.typeNames.ts`, and `.typeNames.json` companion files. Disabling it removes previously generated `.enums.ts` files on the next generation run.
 
 Example:
 
