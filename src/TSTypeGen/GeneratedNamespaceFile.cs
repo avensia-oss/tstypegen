@@ -12,6 +12,11 @@ namespace TSTypeGen
 {
     public class GeneratedNamespaceFile
     {
+        private static readonly Regex EnumRegex = new Regex(@"^\s*const enum\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*\{(?<body>[\s\S]*?)^\s*\}", RegexOptions.Multiline);
+        private static readonly Regex EnumMemberRegex = new Regex(@"^\s*(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*'(?<value>[^']*)',?\s*$", RegexOptions.Multiline);
+        private static readonly Regex DotNetTypeNameAndInterfaceRegex = new Regex(@"@DotNetTypeName\s+(?<dotnet>[^\r\n*]+)[\s\S]*?interface\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\b", RegexOptions.Multiline);
+        private static readonly Regex DotNetCanonicalTypeNameAndInterfaceRegex = new Regex(@"@DotNetCanonicalTypeName\s+(?<dotnet>[^\r\n*]+)[\s\S]*?interface\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\b", RegexOptions.Multiline);
+
         public string FilePath { get; }
         private readonly string _namespaceName;
         private readonly ImmutableList<Type> _types;
@@ -72,7 +77,7 @@ namespace TSTypeGen
             {
                 var origContent = await File.ReadAllTextAsync(FilePath);
                 var newContent = await GetContentAsync(typeBuilderConfig, config, generatorContext);
-                if (newContent.Replace("\r\n", "\n") != origContent.Replace("\r\n" ,"\n"))
+                if (NormalizeNewLines(newContent) != NormalizeNewLines(origContent))
                 {
                     Program.WriteError($"Generated file {FilePath} does not match the source definition. Run the frontend build and commit all changes to generated types.");
                     return false;
@@ -197,9 +202,7 @@ namespace TSTypeGen
 
         private static string BuildConstsSource(string declarationFileContent, string newLine)
         {
-            var enumRegex = new Regex(@"^\s*const enum\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*\{(?<body>[\s\S]*?)^\s*\}", RegexOptions.Multiline);
-            var memberRegex = new Regex(@"^\s*(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*'(?<value>[^']*)',?\s*$", RegexOptions.Multiline);
-            var matches = enumRegex.Matches(declarationFileContent);
+            var matches = EnumRegex.Matches(declarationFileContent);
             if (matches.Count == 0)
                 return null;
 
@@ -208,7 +211,7 @@ namespace TSTypeGen
             {
                 var enumName = enumMatch.Groups["name"].Value;
                 var body = enumMatch.Groups["body"].Value;
-                var members = memberRegex.Matches(body);
+                var members = EnumMemberRegex.Matches(body);
 
                 var sb = new StringBuilder();
                 sb.Append("export const ").Append(enumName).Append(" = {").Append(newLine);
@@ -261,9 +264,7 @@ namespace TSTypeGen
 
         private static string BuildEnumsSource(string declarationFileContent, string newLine)
         {
-            var enumRegex = new Regex(@"^\s*const enum\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*\{(?<body>[\s\S]*?)^\s*\}", RegexOptions.Multiline);
-            var memberRegex = new Regex(@"^\s*(?<name>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*'(?<value>[^']*)',?\s*$", RegexOptions.Multiline);
-            var enumMatches = enumRegex.Matches(declarationFileContent);
+            var enumMatches = EnumRegex.Matches(declarationFileContent);
 
             var (typeNameEntries, canonicalNameEntries) = GetDotNetTypeNameEntries(declarationFileContent);
 
@@ -273,7 +274,7 @@ namespace TSTypeGen
             {
                 var enumName = enumMatch.Groups["name"].Value;
                 var body = enumMatch.Groups["body"].Value;
-                var members = memberRegex.Matches(body);
+                var members = EnumMemberRegex.Matches(body);
 
                 var sb = new StringBuilder();
                 sb.Append("export const enum ").Append(enumName).Append(" {").Append(newLine);
@@ -315,11 +316,8 @@ namespace TSTypeGen
 
         private static (List<KeyValuePair<string, string>> typeNameEntries, List<KeyValuePair<string, string>> canonicalNameEntries) GetDotNetTypeNameEntries(string declarationFileContent)
         {
-            var dotNetTypeNameAndInterfaceRegex = new Regex(@"@DotNetTypeName\s+(?<dotnet>[^\r\n*]+)[\s\S]*?interface\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\b", RegexOptions.Multiline);
-            var dotNetCanonicalTypeNameAndInterfaceRegex = new Regex(@"@DotNetCanonicalTypeName\s+(?<dotnet>[^\r\n*]+)[\s\S]*?interface\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)\b", RegexOptions.Multiline);
-
-            var typeNameMatches = dotNetTypeNameAndInterfaceRegex.Matches(declarationFileContent);
-            var canonicalNameMatches = dotNetCanonicalTypeNameAndInterfaceRegex.Matches(declarationFileContent);
+            var typeNameMatches = DotNetTypeNameAndInterfaceRegex.Matches(declarationFileContent);
+            var canonicalNameMatches = DotNetCanonicalTypeNameAndInterfaceRegex.Matches(declarationFileContent);
 
             var typeNameEntries = new Dictionary<string, string>(StringComparer.Ordinal);
 
